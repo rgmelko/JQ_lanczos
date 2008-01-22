@@ -28,7 +28,7 @@ GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const int Sz)
      }
   }//Dim
 
-//  cout<<"Vdim "<<Vdim<<" "<<Dim<<endl;
+  //  cout<<"Vdim "<<Vdim<<" "<<Dim<<endl;
 
 }//constructor
 

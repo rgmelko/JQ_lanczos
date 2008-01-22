@@ -10,7 +10,7 @@ using namespace std;
 #include <blitz/array.h>
 BZ_USING_NAMESPACE(blitz)
 
-typedef float h_float;  //precision for Hamiltonian storage
+typedef double h_float;  //precision for Hamiltonian storage
 
 class GENHAM{
 
@@ -43,7 +43,6 @@ class GENHAM{
     void Bonds_18A();
     void Bonds_20A();
     void Bonds_24A();
-    void Bonds_24R();
     void Bonds_26A();
     void SparseHamJQ();
     void FullHamJQ();

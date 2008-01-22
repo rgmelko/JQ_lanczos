@@ -37,8 +37,6 @@ class LANCZOS{
 
   private:
    int STARTIT;
-   long double CONV_PREC; //convergence precision
-
    Array<l_double,1> V0;  
    Array<l_double,1> V1;    //Ground state vector
    Array<l_double,1> V2;

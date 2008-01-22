@@ -6,8 +6,7 @@ LANCZOS::LANCZOS(const int Dim_) : Dim (Dim_)
 {
   //Dim = Dim_;
 
-  STARTIT = 20;
-  CONV_PREC = 1E-7;
+  STARTIT = 12;
 
   Psi.resize(Dim_);
   V0.resize(Dim_); 
@@ -147,12 +146,12 @@ void LANCZOS::Diag(const GENHAM& SparseH, const int Neigen, const int Evects2)
     for (int o=0; o<Ord.size(); o++)  cout<<setprecision(12)<<Ord.at(o)<<"  ";     
     cout<<endl;
 
-	if ( (E0 - Ord.back() ) < CONV_PREC) {
+	if ( (E0 - Ord.back() ) < 1E-8) {
 	  Lexit = 1;
-	  //cout<<"Lanc :"<<iter<<" ";
-	  //cout<<setprecision(12)<<d(min)<<"\n";     
-          //for (int o=0; o<Ord.size(); o++)  cout<<setprecision(12)<<Ord.at(o)<<"  ";     
-          //cout<<endl;
+	  //  cout<<"Lanc :"<<iter<<" ";
+	  // cout<<setprecision(12)<<d(min)<<"\n";     
+	  // for (int o=0; o<Ord.size(); o++)  cout<<setprecision(12)<<Ord.at(o)<<"  ";     
+	  // cout<<endl;
 	}
 	else {
 	  E0 = Ord.back(); //E0 = d(min);
@@ -160,7 +159,7 @@ void LANCZOS::Diag(const GENHAM& SparseH, const int Neigen, const int Evects2)
 
         if (iter == LIT-2) {
           LIT += 100;
-          //cout<<LIT<<" Resize Lan. it \n";
+	  //          cout<<LIT<<" Resize Lan. it \n";
           d.resize(LIT);
           e.resize(LIT);
           Hmatrix.resize(LIT,LIT);
