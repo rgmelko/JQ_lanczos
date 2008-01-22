@@ -1,0 +1,153 @@
+#! /usr/bin/python
+
+#from Numeric import *
+from numpy import *
+import os
+import time
+import sys
+
+# ----------------------------------------------------------------------
+def getData(file_name):
+    ''' Reads the production data from file_name and returns the number of 
+        rows, columns and the actual data'''
+
+    # Try to open the file, and read in all the lines, if it doesn't exist, exit
+    try:
+        in_file = open(file_name)
+        lines = in_file.readlines()
+        in_file.close()
+	flag=0
+    except:
+	# no file, print dummy numbers
+	flag=1
+	numCol=0
+	numRow=0
+	data = zeros([numRow,numCol],float)
+	
+    if (flag == 0):
+	# Determine the number of Rows (bins) and unique production data types (cols)
+	numCol = len(lines[0].split())
+	numRow = len(lines)
+
+	# Create a matrix which will hold the float versions of the data
+	data = zeros([numRow,numCol],float)
+
+	# Fill the data matrix with the data from the file
+	for cline in lines:
+	    i = lines.index(cline)
+	    st_data = cline.split()
+	    
+	    for cst_data in st_data:
+		j = st_data.index(cst_data)
+		data[i,j] = float(cst_data)
+		
+    return([flag,numRow,numCol,data])
+
+# ----------------------------------------------------------------------
+
+
+
+
+# ----------------------------------------------------------------------
+# Main Program
+# ----------------------------------------------------------------------
+
+
+# Parse the command line input to get the name of the input file
+if (len(sys.argv) != 4):
+    print 'Syntax is \n\t%s' % sys.argv[0] + ' Lcl Sz EvalMax\n'
+    sys.exit()
+else:
+    Lcl = str(sys.argv[1])
+    Sz = int(sys.argv[2])
+    EvalMax = int(sys.argv[3])
+
+
+JbyQ = arange(-0.6, 1.0, 0.025)
+#JbyQ = [0.00]
+
+for cEval in range(0, EvalMax):
+    filename = 'LancJQ'+Lcl+'_Sz'+ str(Sz) + '_ev'+str(cEval)+'.dat'
+    print 'written '+filename
+    FILE = open(filename,"w")
+
+
+for cJbyQ in JbyQ:
+    print str(cJbyQ) + '\n'
+
+    #FIRST GET GND STATE ENERGY IN Sz=0 sector.
+    file_name = '/Users/ribhukaul/melkorg/LANCZOS/branches/ver2/DATA/LANC1/' + 'L' + str(Lcl) + os.sep + 'J%4.3f' %(cJbyQ) + os.sep + 'Sz0' + os.sep + 'data.out'
+
+#    flag,numRow,numCol,data = getData(file_name)  # Read the data from the file, and compute statistics
+    flag,IterMax,EvalMax2,data = getData(file_name)  # Read the data from the file, and compute statistics
+    if (flag == 1) :
+     print 'problem reading data'
+
+    if (EvalMax2<EvalMax) :
+       print 'problem with number of eigenvalues\n'
+       flag = 1
+
+    if (flag == 0):
+        # if flag ==1, dont print anything, there was no file OR a problem
+        data=data.T # transpose data: dont ask why!
+
+        iter=0
+        cnt=0
+        while cnt<1:
+            cnt=0
+            if abs(data[0][iter]-data[0][iter+1])<0.00001: 
+                cnt=cnt+1
+            iter=iter+1
+
+        GS_Eval=data[0][iter] # ABSOLUTE (IN ALL SECTORS) GROUND STATE ENERGY !!
+
+# NOW MOVE ON TO ACTUAL CASE
+    file_name = '/Users/ribhukaul/melkorg/LANCZOS/branches/ver2/DATA/LANC1/' + 'L' + str(Lcl) + os.sep + 'J%4.3f' %(cJbyQ) + os.sep + 'Sz%d' %(Sz) + os.sep + 'data.out'
+ 
+#    flag,numRow,numCol,data = getData(file_name)  # Read the data from the file, and compute statistics
+    flag,IterMax,EvalMax2,data = getData(file_name)  # Read the data from the file, and compute statistics
+    if (flag == 1) :
+     print 'problem reading data'
+
+    if (EvalMax2<EvalMax) :
+       print 'problem with number of eigenvalues\n'
+       flag = 1
+
+    if (flag == 0):
+        # if flag ==1, dont print anything, there was no file OR a problem
+        data=data.T # transpose data: dont ask why!
+
+        iter=0
+        cnt=0
+        while cnt<EvalMax:
+            cnt=0
+            for cEval in range(0, EvalMax):
+                if abs(data[cEval][iter]-data[cEval][iter+1])<0.00001: 
+                    cnt=cnt+1
+#            if (iter+2) == IterMax :
+#                print 'Data never converged!!!\n'
+#                cnt=EvalMax
+            iter=iter+1
+            
+
+        print str(cnt)+" "+str(iter)
+        
+        #WRITE EIGENVALUES TO FILE
+        for cEval in range(0, EvalMax):
+            filename = 'LancJQ'+Lcl+'_Sz'+ str(Sz) + '_ev'+str(cEval)+'.dat'
+            FILE = open(filename,"a")
+            dataline = '%4.3f '%(cJbyQ)+ str(data[cEval][iter]-GS_Eval) + '\n'
+            print dataline
+            FILE.writelines(dataline)
+
+	
+
+
+
+
+
+
+
+
+
+    
