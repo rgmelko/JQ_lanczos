@@ -4,21 +4,40 @@ Get dimension of lattice, assume square, n
 Get spin sector to work with, Sz
 //This is total Sz, for an even number of sites, this is an integer
 
-Define vector to hold parent states, basis
+Define vector to hold parent states, basis in integer form
 
 Define expanded version of integer as an array of booleans, test
 
 Define vector of test-types to hold daughter states, daughters
 
+Define boolean, found //found is true if some translation of state i has been found in the basis set (so stop checking)
+
 For states 0<=i<2^n //cycle through all states
-	expand integer[i] into test
+	clear daughters vector //since daughters is only the expansion of the daughter states of the current state, i
+	found=false
+
+	expand state[i] into test //convert state from integer to bit string
+
 	if test has right total Sz //only pay attention to those in the correct spin sector
 		for 0<=horiz<n //for the application of the 1-right operator to get to all possibilities
 			for 0<=vert<n //for the application of the 1-down operator to get to all possibilities
+
+				//all states will be in daughters, except parent state
 				push translation[test, horiz,vert] into daughters
-				for j in all basis so far
-					if daughters[last] != basis[j]
-						push daughters[last] into basis
+
+				if found=false
+					for j in all basis so far //compare translated state 
+						if daughters[last] = expansion(basis[j])
+							found = true
+
+		//if this point is reached, and found!=true, then no translation of state i is in the basis set so far
+		if found=false
+			push i into basis
+
+		//Also if found=false, generate hamiltonian elements with all other states
+
+
+
 
 
 
