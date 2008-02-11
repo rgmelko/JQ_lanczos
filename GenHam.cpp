@@ -508,5 +508,7 @@ double GENHAM::HOFFdPlaq(const int si, const long bra){
 }//HOFFdPart
 
 int main()
+//Added TF, so this would compile on its own without worrying about all the Lanczoos stuff yet
 {
+	//Testing routing for new GenHam class
 }
