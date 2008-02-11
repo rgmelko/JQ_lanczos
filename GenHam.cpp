@@ -1,18 +1,168 @@
 #include "GenHam.h"
 
 //----------------------------------------------------------
+//Added TF
+void GENHAM::expandVec(int stateNum)
+//expands integer into binary string
+{
+	bool digit; //selected digit
+
+	stateVec.clear(); //to make sure no memory leaking
+
+	do
+	{
+		digit = stateNum % 2;
+		stateVec.push_back(digit);
+		stateNum/=2;
+	}
+	while(stateNum>0);
+}
+
+void GENHAM::collapseVec(int& stateNum)
+//collapses binary string into an integer
+{
+	stateNum=0;
+
+	for (int i=(stateVec.size()-1); i>=0; i--)
+	{
+		stateNum*=2;
+		stateNum+=stateVec.back();
+		stateVec.pop_back();//eliminates element
+	}
+}
+
+double GENHAM::calc_Sz()
+//returns sum of up-bits minus sum of down bits
+{
+	double total; //running total of Sz
+
+	for (int i=0; i<stateVec.size(); i++)
+	{
+		total+=stateVec[i];
+	}
+	total-=0.5*stateVec.size();//effectively subtract half off each value
+
+	return total;
+}
+
+void GENHAM::translate(bool x, bool y, int n)
+//translate statevector of nxn lattice right x and down y
+//TODO generalize this to x,y>1
+// will require as many temp's as there are shifts in that direction
+{
+	bool temp; //for bit shifting
+
+	if (x==true)
+	{  //x-translations
+		for (int row=0; row<n; row++)
+		{
+			temp=stateVec[n*row+n-1]; //save the last bit in the row
+			for (int column=n-1; column>=(0+1); column--)//shift everything in the row right one bit
+			{
+				stateVec[n*row+column]=stateVec[n*row+column-1];
+			}
+			stateVec[n*row]=temp;
+		}
+	}
+
+	if (y==true)
+	{
+		//y-translations
+		for (int column=0; column<n; column++)
+		{
+			temp=stateVec[n*(n-1)+column]; //save the last bit in each column
+			for (int row=n-1; row>=(0+1); row--) //shift everything down one bit
+			{
+				stateVec[n*row+column]=stateVec[n*(row-1)+column];
+			}
+			stateVec[column]=temp;
+		}
+	}
+}
+//TODO Vector operators = and == are not working
+//this is a workaround for the latter
+bool GENHAM::equal()
+{
+	bool same=true;
+
+	for (int i=0; i<(daughters.back())[i]; i++)
+	{
+		if (((daughters.back())[i])!=stateVec[i])
+		{
+			same=false;
+		}
+	}
+	return same;
+}
+
+//End Added TF
+//----------------------------------------------------------
 GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const int Sz)  
-               : JJ(J_), QQ(Q_) 
-//create bases and determine dim of full Hilbert space
+					: JJ(J_), QQ(Q_) 
+//constructor, TF's
+{
+	Nsite=Ns; //dimension of lattice
+
+	vector<int> Basis; //define vector to hold parent states in integer form
+	vector<bool> test; //expanded version of an integer as an array of booleans
+	vector<bool> temp; //temporary version of a test for comparisons
+
+	bool found; //true if some translation of a state has been found in the basis set on a previous translation (so stop checking)
+
+	for (int state=0; state<=pow(2.,Nsite); state++)//cycle through all states
+	{
+		//clear daughters and reset found to false
+		daughters.clear();
+		found=false;
+
+		expandVec(state); //convert state from integer to bit string
+		test.assign(stateVec.begin(), stateVec.end());
+
+		if (calc_Sz()==Sz) //only pay attention to those in the correct spin sector
+		{
+			for (int i=0; i<Nsite; i++) //for the application of the 1-right operator to get to all possibilities
+			{
+				for (int j=0; j<Nsite; j++) //for the application of the 1-down operator to get to all possibilities
+				{
+					//all states will be in daughters, except parent state
+					daughters.push_back(test);
+
+					if (found==false)
+					{
+						for (int k=0; k<Basis.size(); k++) //compare translated state to all basis vectors
+						{
+							expandVec(Basis[k]);//puts expansion into stateVec
+							if (equal())
+							{
+								found=true;
+							}
+						}
+					}
+					translate(0, 1, Nsite); //translate one down
+				}
+				translate(1, 0, Nsite); //translate one right
+			}
+
+			//if this point is reached, and found!=true, then no translation of state is in the basis set so far
+			if (found==false)
+			{
+				Basis.push_back(state);
+			}
+
+			//Also if found=false, generate hamiltonian elements with all other states
+		}
+	}
+}
+/*//create bases and determine dim of full Hilbert space
 {
   int Dim;
   Nsite = Ns;
 
   Dim = 2;  //  S=1/2 models : two states
-  for (int ch=1; ch<Nsite; ch++) Dim *=2;
-  Fdim = Dim;
+  for (int ch=1; ch<Nsite; ch++) Nsite *=2;
+  FNsite = Nsite;
 
-  BasPos.resize(Dim,-1); //initialization 
+  BasPos.resize(Nsite,-1); //initialization 
 
   Vdim=0;
   unsigned long temp;    //create basis (16 site cluster)
@@ -30,7 +180,7 @@ GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const int Sz)
 
 //  cout<<"Vdim "<<Vdim<<" "<<Dim<<endl;
 
-}//constructor
+}//constructor*/
 
 
 //----------------------------------------------------------

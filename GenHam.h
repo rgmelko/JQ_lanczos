@@ -33,6 +33,18 @@ class GENHAM{
     
     Array<double,2> Ham;  //full hamiltonian
 
+    //Added TF
+	 vector< vector<bool> > daughters; //vector of a parent and its daughter states
+	 vector<long> stateVec; //workspace for functions, since I can't figure out how to pass vectors
+
+    bool equal(); //poor workaround, see GenHam.cpp for details
+
+	 void expandVec(int);
+	 void collapseVec(int&);
+	 double calc_Sz();
+	 void translate(bool, bool, int);
+	 //End of Added TF
+
     GENHAM(const int,const h_float J_, const h_float Q_,const int Sz); 
     void printg();
     //double at(const int , const int );
