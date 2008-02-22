@@ -1,24 +1,53 @@
 #include "GenHam.h"
+#include <iostream>
+#include <fstream>
 
 //----------------------------------------------------------
 //Added TF
-void GENHAM::expandVec(int stateNum)
+
+void GENHAM::printBoolVector(const vector <bool>& aV)
+{
+	for (int i=0; i<Nsite; i++)
+	{
+		for (int j=0; j<Nsite; j++)
+		{
+			cout << aV[i*Nsite+j] << " " ;
+		}
+		cout << endl;
+	}
+	cout << endl << endl;
+}
+
+void GENHAM::printBoolArray(const vector <vector<bool> >& aV)
+//Prints a set of daughter states
+{
+	for (int i=0; i<aV.size(); i++)
+	{
+		for (int j=0; j<aV[i].size(); j++)
+		{
+			cout << aV[i][j] << " ";
+		}
+		cout << endl;
+	}
+	cout << endl;
+}
+
+void GENHAM::expandVec(int stateNum, vector <bool>& stateVec)
 //expands integer into binary string
 {
 	bool digit; //selected digit
 
 	stateVec.clear(); //to make sure no memory leaking
 
-	do
+	for (int place=0; place<(Nsite*Nsite); place++) //dimension of expanded vector must be that of the hilbert space
 	{
 		digit = stateNum % 2;
 		stateVec.push_back(digit);
-		stateNum/=2;
+		stateNum=(stateNum-digit)/2;
 	}
-	while(stateNum>0);
 }
 
-void GENHAM::collapseVec(int& stateNum)
+void GENHAM::collapseVec(int& stateNum, vector <bool>& stateVec)
 //collapses binary string into an integer
 {
 	stateNum=0;
@@ -31,7 +60,7 @@ void GENHAM::collapseVec(int& stateNum)
 	}
 }
 
-double GENHAM::calc_Sz()
+double GENHAM::calc_Sz(const vector <bool>& stateVec)
 //returns sum of up-bits minus sum of down bits
 {
 	double total; //running total of Sz
@@ -45,7 +74,7 @@ double GENHAM::calc_Sz()
 	return total;
 }
 
-void GENHAM::translate(bool x, bool y, int n)
+void GENHAM::translate(bool x, bool y, int n, vector <bool>& stateVec)
 //translate statevector of nxn lattice right x and down y
 //TODO generalize this to x,y>1
 // will require as many temp's as there are shifts in that direction
@@ -54,6 +83,8 @@ void GENHAM::translate(bool x, bool y, int n)
 
 	if (x==true)
 	{  //x-translations
+//		cout << "X-translation running" << endl;
+//		printBoolVector(stateVec);
 		for (int row=0; row<n; row++)
 		{
 			temp=stateVec[n*row+n-1]; //save the last bit in the row
@@ -63,36 +94,68 @@ void GENHAM::translate(bool x, bool y, int n)
 			}
 			stateVec[n*row]=temp;
 		}
+//		printBoolVector(stateVec);
 	}
 
 	if (y==true)
-	{
-		//y-translations
+	{//y-translations
+//		cout << "Y-translation running" << endl;
+//		printBoolVector(stateVec);
 		for (int column=0; column<n; column++)
 		{
 			temp=stateVec[n*(n-1)+column]; //save the last bit in each column
+//			cout << column << "Temp=" << temp << endl;
 			for (int row=n-1; row>=(0+1); row--) //shift everything down one bit
 			{
 				stateVec[n*row+column]=stateVec[n*(row-1)+column];
+//				cout << column << row << " ";
+//				printBoolVector(stateVec);
 			}
 			stateVec[column]=temp;
+//			printBoolVector(stateVec);
 		}
+//		printBoolVector(stateVec);
 	}
 }
 //TODO Vector operators = and == are not working
 //this is a workaround for the latter
-bool GENHAM::equal()
+bool GENHAM::equal(const vector <bool>& v1, const vector <bool>& v2)
 {
-	bool same=true;
+	bool same=false;
 
-	for (int i=0; i<(daughters.back())[i]; i++)
+	if (v1.size()==v2.size())
 	{
-		if (((daughters.back())[i])!=stateVec[i])
+		same=true;
+		for (int i=0; i<v1.size(); i++)
 		{
-			same=false;
+			if (v1[i]!=v2[i])
+			{
+				same=false;
+			}
 		}
 	}
 	return same;
+}
+
+void GENHAM::gen_daughters(int aBasis, vector <vector <bool> >& daughters)
+//accepts integer and finds all translated versions thereof
+{
+	daughters.clear();
+
+	vector <bool> test;
+	expandVec(aBasis,test);
+
+	for (int i=0; i<Nsite; i++) //for the application of the 1-right operator to get to all possibilities
+	{
+		for (int j=0; j<Nsite; j++) //for the application of the 1-down operator to get to all possibilities
+		{
+			//all states will be in daughters, except parent state
+			daughters.push_back(test);
+
+			translate(0, 1, Nsite, test); //translate one down
+		}
+		translate(1, 0, Nsite, test); //translate one right
+	}//I'm fairly certain that the last iterations put the translated state baack around to the original
 }
 
 //End Added TF
@@ -101,7 +164,13 @@ GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const int Sz)
 					: JJ(J_), QQ(Q_) 
 //constructor, TF's
 {
-	Nsite=Ns; //dimension of lattice
+	Fdim=pow(2.,(Ns*Ns));
+	Nsite=Ns; //dimension of lattice, this is a slightly different implementation
+				 //before, Nsite was the dimension of a state
+	
+	cout << "Hamiltonian Generator Starting." << endl;
+	cout << "Important parameters: Ns: " << Ns << " Sz: " << Sz << endl;
+	getchar();
 
 	vector<int> Basis; //define vector to hold parent states in integer form
 	vector<bool> test; //expanded version of an integer as an array of booleans
@@ -109,39 +178,50 @@ GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const int Sz)
 
 	bool found; //true if some translation of a state has been found in the basis set on a previous translation (so stop checking)
 
-	for (int state=0; state<=pow(2.,Nsite); state++)//cycle through all states
+	for (int state=0; state<Fdim; state++)//cycle through all states
 	{
 		//clear daughters and reset found to false
 		daughters.clear();
 		found=false;
 
-		expandVec(state); //convert state from integer to bit string
-		test.assign(stateVec.begin(), stateVec.end());
+		expandVec(state,test); //convert state from integer to bit string
+		cout << state << endl;
+		//printBoolVector(test);
 
-		if (calc_Sz()==Sz) //only pay attention to those in the correct spin sector
+		if (calc_Sz(test)==Sz) //only pay attention to those in the correct spin sector
 		{
+			//printBoolVector(test);
+			//cout << "--**--" << endl;
 			for (int i=0; i<Nsite; i++) //for the application of the 1-right operator to get to all possibilities
 			{
 				for (int j=0; j<Nsite; j++) //for the application of the 1-down operator to get to all possibilities
 				{
+//				cout << "Checkpoint2 i=" << i << " j=" << j << endl;
+//					printBoolArray(daughters);
+//					printBoolVector(test);
 					//all states will be in daughters, except parent state
+					cout << "Shifted " << i << "x " << j+i << "y" << endl;
+					printBoolVector(test);
 					daughters.push_back(test);
 
 					if (found==false)
 					{
 						for (int k=0; k<Basis.size(); k++) //compare translated state to all basis vectors
 						{
-							expandVec(Basis[k]);//puts expansion into stateVec
-							if (equal())
+							expandVec(Basis[k],temp);//puts expansion into stateVec
+							if (equal(test, temp))
 							{
 								found=true;
 							}
 						}
 					}
-					translate(0, 1, Nsite); //translate one down
+					if ((j+1)<Nsite) //to avoid unnessessary last rotation
+					{ translate(0, 1, Nsite, test);} //translate one down
 				}
-				translate(1, 0, Nsite); //translate one right
+				if ((i+1)<Nsite) //to avoid unnessessary last rotation
+				{translate(1, 0, Nsite,test);} //translate one right
 			}
+			getchar();
 
 			//if this point is reached, and found!=true, then no translation of state is in the basis set so far
 			if (found==false)
@@ -184,6 +264,7 @@ GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const int Sz)
 
 
 //----------------------------------------------------------
+/*
 void GENHAM::printg()
 {
   int i,j;
@@ -506,9 +587,25 @@ double GENHAM::HOFFdPlaq(const int si, const long bra){
   return valH;
 
 }//HOFFdPart
+*/
+
+#include "simparam.h"
 
 int main()
 //Added TF, so this would compile on its own without worrying about all the Lanczoos stuff yet
 {
-	//Testing routing for new GenHam class
+	//copied from ed_Lan_1107.cpp
+	PARAMS prm;
+	double J;
+	double Q;
+	int Sz;
+ 
+	J=prm.JJ_;
+	Q=-prm.QQ_;// SIGN HAS TO BE FLIPPED: NOW SIGN AT INPUT IS SAME AS PAPER 
+	Sz=prm.Sz_;
+
+	//slightly different implementation of dimensionality
+	//first parameter is now the length of each dimension, so, the square root of the total enumber of elements
+	GENHAM HV(4,J,Q,Sz);
+
 }
