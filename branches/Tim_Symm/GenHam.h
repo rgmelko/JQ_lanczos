@@ -35,14 +35,19 @@ class GENHAM{
 
     //Added TF
 	 vector< vector<bool> > daughters; //vector of a parent and its daughter states
-	 vector<long> stateVec; //workspace for functions, since I can't figure out how to pass vectors
+	 vector< vector<bool> > daughters1; //same, but for another set, uused for Hamiltonian generation
+	 vector<bool> stateVec; //workspace for functions, since I can't figure out how to pass vectors
 
-    bool equal(); //poor workaround, see GenHam.cpp for details
+    void printBoolVector(const vector<bool>&);
+	 void printBoolArray(const vector<vector <bool> >&);
 
-	 void expandVec(int);
-	 void collapseVec(int&);
-	 double calc_Sz();
-	 void translate(bool, bool, int);
+    bool equal(const vector<bool>&, const vector<bool>&); //poor workaround, see GenHam.cpp for details
+
+	 void expandVec(int,vector<bool>&);
+	 void collapseVec(int&,vector<bool>&);
+	 double calc_Sz(const vector<bool>&);
+	 void translate(bool, bool, int,vector<bool>&);
+    void gen_daughters(int,vector<vector <bool> >&);
 	 //End of Added TF
 
     GENHAM(const int,const h_float J_, const h_float Q_,const int Sz); 
