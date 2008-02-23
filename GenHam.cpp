@@ -5,6 +5,14 @@
 //----------------------------------------------------------
 //Added TF
 
+void printLongVector(const vector <long>& aV)
+{
+	for (int i=0; i<aV.size(); i++)
+	{
+		cout << aV[i] << " " ;
+	}
+	cout << endl;
+}
 void GENHAM::printBoolVector(const vector <bool>& aV)
 {
 	for (int i=0; i<Nsite; i++)
@@ -137,7 +145,7 @@ bool GENHAM::equal(const vector <bool>& v1, const vector <bool>& v2)
 	return same;
 }
 
-void GENHAM::gen_daughters(int aBasis, vector <vector <bool> >& daughters)
+void GENHAM::gen_daughters(long aBasis, vector <vector <bool> >& daughters)
 //accepts integer and finds all translated versions thereof
 {
 	daughters.clear();
@@ -152,9 +160,11 @@ void GENHAM::gen_daughters(int aBasis, vector <vector <bool> >& daughters)
 			//all states will be in daughters, except parent state
 			daughters.push_back(test);
 
-			translate(0, 1, Nsite, test); //translate one down
+			if ((j+1)<Nsite) //to avoid unnessessary last rotation
+			{ translate(0, 1, Nsite, test);} //translate one down
 		}
-		translate(1, 0, Nsite, test); //translate one right
+		if ((i+1)<Nsite) //to avoid unnessessary last rotation
+		{translate(1, 0, Nsite,test);} //translate one right
 	}//I'm fairly certain that the last iterations put the translated state baack around to the original
 }
 
@@ -172,7 +182,7 @@ GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const int Sz)
 	cout << "Important parameters: Ns: " << Ns << " Sz: " << Sz << endl;
 	getchar();
 
-	vector<int> Basis; //define vector to hold parent states in integer form
+	vector<long> Basis; //define vector to hold parent states in integer form
 	vector<bool> test; //expanded version of an integer as an array of booleans
 	vector<bool> temp; //temporary version of a test for comparisons
 
@@ -185,23 +195,19 @@ GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const int Sz)
 		found=false;
 
 		expandVec(state,test); //convert state from integer to bit string
-		cout << state << endl;
-		//printBoolVector(test);
 
 		if (calc_Sz(test)==Sz) //only pay attention to those in the correct spin sector
 		{
+			//cout << "state: " << state << endl;
 			//printBoolVector(test);
-			//cout << "--**--" << endl;
+			//cout << "basis so far:" << endl;
+			//printLongVector(Basis);
+
 			for (int i=0; i<Nsite; i++) //for the application of the 1-right operator to get to all possibilities
 			{
 				for (int j=0; j<Nsite; j++) //for the application of the 1-down operator to get to all possibilities
 				{
-//				cout << "Checkpoint2 i=" << i << " j=" << j << endl;
-//					printBoolArray(daughters);
-//					printBoolVector(test);
 					//all states will be in daughters, except parent state
-					cout << "Shifted " << i << "x " << j+i << "y" << endl;
-					printBoolVector(test);
 					daughters.push_back(test);
 
 					if (found==false)
@@ -221,16 +227,27 @@ GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const int Sz)
 				if ((i+1)<Nsite) //to avoid unnessessary last rotation
 				{translate(1, 0, Nsite,test);} //translate one right
 			}
-			getchar();
+			//getchar();
 
 			//if this point is reached, and found!=true, then no translation of state is in the basis set so far
 			if (found==false)
 			{
+				//cout << "Current state is not in basis yet.  Adding..." << endl;
 				Basis.push_back(state);
 			}
 
 			//Also if found=false, generate hamiltonian elements with all other states
 		}
+	}
+	printLongVector(Basis);
+	for (int i=0; i<Basis.size(); i++)
+	{
+		cout << "Basis state " << Basis[i] << endl;
+		expandVec(Basis[i],temp);
+		printBoolVector(temp);
+		cout << "Daughters" << endl;
+		gen_daughters(Basis[i],daughters1);
+		printBoolArray(daughters1);
 	}
 }
 /*//create bases and determine dim of full Hilbert space
@@ -264,7 +281,7 @@ GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const int Sz)
 
 
 //----------------------------------------------------------
-/*
+
 void GENHAM::printg()
 {
   int i,j;
@@ -587,7 +604,6 @@ double GENHAM::HOFFdPlaq(const int si, const long bra){
   return valH;
 
 }//HOFFdPart
-*/
 
 #include "simparam.h"
 
@@ -606,6 +622,6 @@ int main()
 
 	//slightly different implementation of dimensionality
 	//first parameter is now the length of each dimension, so, the square root of the total enumber of elements
-	GENHAM HV(4,J,Q,Sz);
+	GENHAM HV(2,J,Q,Sz);
 
 }

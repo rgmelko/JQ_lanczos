@@ -47,7 +47,7 @@ class GENHAM{
 	 void collapseVec(int&,vector<bool>&);
 	 double calc_Sz(const vector<bool>&);
 	 void translate(bool, bool, int,vector<bool>&);
-    void gen_daughters(int,vector<vector <bool> >&);
+    void gen_daughters(long,vector<vector <bool> >&);
 	 //End of Added TF
 
     GENHAM(const int,const h_float J_, const h_float Q_,const int Sz); 
