@@ -8,9 +8,7 @@
 void printLongVector(const vector <long>& aV)
 {
 	for (int i=0; i<aV.size(); i++)
-	{
-		cout << aV[i] << " " ;
-	}
+	{cout << aV[i] << " " ;}
 	cout << endl;
 }
 void GENHAM::printBoolVector(const vector <bool>& aV)
@@ -18,9 +16,7 @@ void GENHAM::printBoolVector(const vector <bool>& aV)
 	for (int i=0; i<Nsite; i++)
 	{
 		for (int j=0; j<Nsite; j++)
-		{
-			cout << aV[i*Nsite+j] << " " ;
-		}
+		{cout << aV[i*Nsite+j] << " " ;}
 		cout << endl;
 	}
 	cout << endl << endl;
@@ -32,12 +28,10 @@ void GENHAM::printBoolArray(const vector <vector<bool> >& aV)
 	for (int i=0; i<aV.size(); i++)
 	{
 		for (int j=0; j<aV[i].size(); j++)
-		{
-			cout << aV[i][j] << " ";
-		}
+		{cout << aV[i][j] << " ";}
 		cout << endl;
 	}
-	cout << endl;
+	//cout << endl;
 }
 
 void GENHAM::expandVec(int stateNum, vector <bool>& stateVec)
@@ -74,9 +68,7 @@ double GENHAM::calc_Sz(const vector <bool>& stateVec)
 	double total; //running total of Sz
 
 	for (int i=0; i<stateVec.size(); i++)
-	{
-		total+=stateVec[i];
-	}
+	{total+=stateVec[i];}
 	total-=0.5*stateVec.size();//effectively subtract half off each value
 
 	return total;
@@ -91,38 +83,24 @@ void GENHAM::translate(bool x, bool y, int n, vector <bool>& stateVec)
 
 	if (x==true)
 	{  //x-translations
-//		cout << "X-translation running" << endl;
-//		printBoolVector(stateVec);
 		for (int row=0; row<n; row++)
 		{
 			temp=stateVec[n*row+n-1]; //save the last bit in the row
 			for (int column=n-1; column>=(0+1); column--)//shift everything in the row right one bit
-			{
-				stateVec[n*row+column]=stateVec[n*row+column-1];
-			}
+			{stateVec[n*row+column]=stateVec[n*row+column-1];}
 			stateVec[n*row]=temp;
 		}
-//		printBoolVector(stateVec);
 	}
 
 	if (y==true)
 	{//y-translations
-//		cout << "Y-translation running" << endl;
-//		printBoolVector(stateVec);
 		for (int column=0; column<n; column++)
 		{
 			temp=stateVec[n*(n-1)+column]; //save the last bit in each column
-//			cout << column << "Temp=" << temp << endl;
 			for (int row=n-1; row>=(0+1); row--) //shift everything down one bit
-			{
-				stateVec[n*row+column]=stateVec[n*(row-1)+column];
-//				cout << column << row << " ";
-//				printBoolVector(stateVec);
-			}
+			{stateVec[n*row+column]=stateVec[n*(row-1)+column];}
 			stateVec[column]=temp;
-//			printBoolVector(stateVec);
 		}
-//		printBoolVector(stateVec);
 	}
 }
 //TODO Vector operators = and == are not working
@@ -137,9 +115,7 @@ bool GENHAM::equal(const vector <bool>& v1, const vector <bool>& v2)
 		for (int i=0; i<v1.size(); i++)
 		{
 			if (v1[i]!=v2[i])
-			{
-				same=false;
-			}
+			{same=false;}
 		}
 	}
 	return same;
@@ -152,22 +128,36 @@ void GENHAM::gen_daughters(long aBasis, vector <vector <bool> >& daughters)
 
 	vector <bool> test;
 	expandVec(aBasis,test);
+	bool foundInDaughters;
 
 	for (int i=0; i<Nsite; i++) //for the application of the 1-right operator to get to all possibilities
 	{
 		for (int j=0; j<Nsite; j++) //for the application of the 1-down operator to get to all possibilities
 		{
-			//all states will be in daughters, except parent state
-			daughters.push_back(test);
+			//all states will be in daughters, including parent state
+			//compare translated state to all previous daughter vectors
+			foundInDaughters=false;
+
+			for (int k=0; k<daughters.size(); k++)
+			{
+				if (equal(test, daughters[k]))
+				{
+					foundInDaughters=true;
+				}
+
+			}
+			if (foundInDaughters==false)
+			{
+				daughters.push_back(test);
+			}
 
 			if ((j+1)<Nsite) //to avoid unnessessary last rotation
 			{ translate(0, 1, Nsite, test);} //translate one down
 		}
 		if ((i+1)<Nsite) //to avoid unnessessary last rotation
 		{translate(1, 0, Nsite,test);} //translate one right
-	}//I'm fairly certain that the last iterations put the translated state baack around to the original
+	}
 }
-
 //End Added TF
 //----------------------------------------------------------
 GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const int Sz)  
@@ -186,39 +176,47 @@ GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const int Sz)
 	vector<bool> test; //expanded version of an integer as an array of booleans
 	vector<bool> temp; //temporary version of a test for comparisons
 
-	bool found; //true if some translation of a state has been found in the basis set on a previous translation (so stop checking)
+	bool foundInBasis; //true if some translation of a state has been found in the basis set on a previous translation (so stop checking)
+	bool foundInDaughters; //true if daughter state already in daughters array
+
+	double element; //running total of hamiltonian matrix element
 
 	for (int state=0; state<Fdim; state++)//cycle through all states
 	{
-		//clear daughters and reset found to false
+		//clear daughters and reset foundInBasis to false
 		daughters.clear();
-		found=false;
+		foundInBasis=false;
 
 		expandVec(state,test); //convert state from integer to bit string
 
 		if (calc_Sz(test)==Sz) //only pay attention to those in the correct spin sector
 		{
-			//cout << "state: " << state << endl;
-			//printBoolVector(test);
-			//cout << "basis so far:" << endl;
-			//printLongVector(Basis);
-
 			for (int i=0; i<Nsite; i++) //for the application of the 1-right operator to get to all possibilities
 			{
 				for (int j=0; j<Nsite; j++) //for the application of the 1-down operator to get to all possibilities
 				{
-					//all states will be in daughters, except parent state
-					daughters.push_back(test);
-
-					if (found==false)
+					foundInDaughters=false;
+					if (daughters.size()>0)
 					{
-						for (int k=0; k<Basis.size(); k++) //compare translated state to all basis vectors
+						for (int k=0; k<daughters.size(); k++)
+						{
+							if (equal(test, daughters[k]))
+							{foundInDaughters=true;}
+						}
+					}
+					if (foundInDaughters==false)
+					{
+						daughters.push_back(test);
+					}
+
+					if (foundInBasis==false)
+					{
+						//compare translated state to all basis vectors
+						for (int k=0; k<Basis.size(); k++)
 						{
 							expandVec(Basis[k],temp);//puts expansion into stateVec
 							if (equal(test, temp))
-							{
-								found=true;
-							}
+							{foundInBasis=true;}
 						}
 					}
 					if ((j+1)<Nsite) //to avoid unnessessary last rotation
@@ -227,13 +225,29 @@ GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const int Sz)
 				if ((i+1)<Nsite) //to avoid unnessessary last rotation
 				{translate(1, 0, Nsite,test);} //translate one right
 			}
-			//getchar();
 
 			//if this point is reached, and found!=true, then no translation of state is in the basis set so far
-			if (found==false)
+			if (foundInBasis==false)
 			{
-				//cout << "Current state is not in basis yet.  Adding..." << endl;
 				Basis.push_back(state);
+
+				//generate column of hamiltonian elements with all other states
+
+				//TODO resize Ham to Basis.size()xBasis.size()
+				//TODO //off diagonal elements
+				//TODO for all basis not including last
+				//TODO 	element_running_total = 0
+				//TODO	generate daughters1 for this basis
+				//TODO	for each daughter1 tensor daughter
+				//TODO		element_running_total += inner product of daughter1 and daughter across hamiltonian
+				//TODO //diagonal elements
+				//TODO element_running_total = 0
+				//TODO for all elements of daughters
+				//TODO	element_running_total += inner product of daughter and daughter across hamiltonian
+				for (b=0; b<(Basis.size())-1; b++) //cycle over all previous basis vectors
+				{
+					element
+				}
 			}
 
 			//Also if found=false, generate hamiltonian elements with all other states
@@ -245,7 +259,7 @@ GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const int Sz)
 		cout << "Basis state " << Basis[i] << endl;
 		expandVec(Basis[i],temp);
 		printBoolVector(temp);
-		cout << "Daughters" << endl;
+		cout << "Daughters1" << endl;
 		gen_daughters(Basis[i],daughters1);
 		printBoolArray(daughters1);
 	}
