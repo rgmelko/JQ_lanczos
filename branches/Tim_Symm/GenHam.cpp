@@ -232,18 +232,30 @@ GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const int Sz)
 				Basis.push_back(state);
 
 				//generate column of hamiltonian elements with all other states
+				Ham.resizeAndPreserve(Basis.size(),Basis.size());//grow the array by one in each direction
+				//off diagonal elements
+				for (int i=0; i<(Basis.size()-1); i++)// for all basis not including last
+				{
+					Ham[i][state]=0; //set element to 0
+					gen_daughters(Basis[i],daughters1);
+					for (int d1=0; d1<daughters.size(); d1++) //for all combinations of daughter and daughter1 members
+					{
+						for (int d2=0; d2<daughters1.size(); d2++)
+						{
+							//TODO This is the weak spot of this code, what's HeisHam?!?
+							Ham[i][state]+=innerProduct(daughters1[d2],HeisHam,daughters[d1]); // add the contribution of this daughter-pair
+						}
+					}
+					Ham[state][i]=Ham[i][state]; //duplicate in lower half of matrix
+				}
+				//diagonal element - set aside since daughters already generated
+				Ham[state][state]=0; //set element to 0
+				for (int d=0; d<daughters.size(); d++) //for all internal combinations of daughter members
+				{
+					//TODO This is the weak spot of this code, what's HeisHam?!?
+					Ham[i][state]+=innerProduct(daughters[d],Ham,daughters[d]); //add the contribution of this daughter-pair
+				}
 
-				//TODO resize Ham to Basis.size()xBasis.size()
-				//TODO //off diagonal elements
-				//TODO for all basis not including last
-				//TODO 	element_running_total = 0
-				//TODO	generate daughters1 for this basis
-				//TODO	for each daughter1 tensor daughter
-				//TODO		element_running_total += inner product of daughter1 and daughter across hamiltonian
-				//TODO //diagonal elements
-				//TODO element_running_total = 0
-				//TODO for all elements of daughters
-				//TODO	element_running_total += inner product of daughter and daughter across hamiltonian
 				for (b=0; b<(Basis.size())-1; b++) //cycle over all previous basis vectors
 				{
 					element
