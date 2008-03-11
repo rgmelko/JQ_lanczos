@@ -74,32 +74,43 @@ double GENHAM::calc_Sz(const vector <bool>& stateVec)
 	return total;
 }
 
-void GENHAM::translate(bool x, bool y, int n, vector <bool>& stateVec)
+void GENHAM::translate(int x, int y, int n, vector <bool>& stateVec)
 //translate statevector of nxn lattice right x and down y
 //TODO generalize this to x,y>1
 // will require as many temp's as there are shifts in that direction
 {
 	bool temp; //for bit shifting
 
-	if (x==true)
+	if (x<0)
+	{	x=Nsite+x;}
+	if (y<0)
+	{	y=Nsite+y;}
+
+	if (x!=0)
 	{  //x-translations
 		for (int row=0; row<n; row++)
 		{
-			temp=stateVec[n*row+n-1]; //save the last bit in the row
-			for (int column=n-1; column>=(0+1); column--)//shift everything in the row right one bit
-			{stateVec[n*row+column]=stateVec[n*row+column-1];}
-			stateVec[n*row]=temp;
+			for (int i=0; i<x; i++)//perform translation x times
+			{
+				temp=stateVec[n*row+n-1]; //save the last bit in the row
+				for (int column=n-1; column>=(0+1); column--)//shift everything in the row right one bit
+				{stateVec[n*row+column]=stateVec[n*row+column-1];}
+				stateVec[n*row]=temp;
+			}
 		}
 	}
 
-	if (y==true)
+	if (y!=0)
 	{//y-translations
 		for (int column=0; column<n; column++)
 		{
-			temp=stateVec[n*(n-1)+column]; //save the last bit in each column
-			for (int row=n-1; row>=(0+1); row--) //shift everything down one bit
-			{stateVec[n*row+column]=stateVec[n*(row-1)+column];}
-			stateVec[column]=temp;
+			for (int i=0; i<y; i++)//perform translation x times
+			{
+				temp=stateVec[n*(n-1)+column]; //save the last bit in each column
+				for (int row=n-1; row>=(0+1); row--) //shift everything down one bit
+				{stateVec[n*row+column]=stateVec[n*(row-1)+column];}
+				stateVec[column]=temp;
+			}
 		}
 	}
 }
@@ -160,7 +171,7 @@ void GENHAM::gen_daughters(long aBasis, vector <vector <bool> >& daughters)
 }
 //End Added TF
 //----------------------------------------------------------
-GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const int Sz)  
+GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const double Sz)  
 					: JJ(J_), QQ(Q_) 
 //constructor, TF's
 {
@@ -191,9 +202,12 @@ GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const int Sz)
 
 		if (calc_Sz(test)==Sz) //only pay attention to those in the correct spin sector
 		{
-			for (int i=0; i<Nsite; i++) //for the application of the 1-right operator to get to all possibilities
+			cout << "Original Vector" << endl;
+			printBoolVector(test);
+			getchar();
+			for (int i=-1; i<3; i=i+3) //for the application of the 1-right operator to get to all possibilities
 			{
-				for (int j=0; j<Nsite; j++) //for the application of the 1-down operator to get to all possibilities
+				for (int j=-1; j<3; (j=j+3)) //for the application of the 1-down operator to get to all possibilities
 				{
 					foundInDaughters=false;
 					if (daughters.size()>0)
@@ -219,11 +233,13 @@ GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const int Sz)
 							{foundInBasis=true;}
 						}
 					}
-					if ((j+1)<Nsite) //to avoid unnessessary last rotation
-					{ translate(0, 1, Nsite, test);} //translate one down
+					cout << "Translating by y=" << j << endl;
+					translate(0, j, Nsite, test); //translate one down or up
+					printBoolVector(test);
 				}
-				if ((i+1)<Nsite) //to avoid unnessessary last rotation
-				{translate(1, 0, Nsite,test);} //translate one right
+				cout << "Translating by x=" << i << endl;
+				translate(i, 0, Nsite,test); //translate one rightt
+				printBoolVector(test);
 			}
 
 			//if this point is reached, and found!=true, then no translation of state is in the basis set so far
@@ -232,7 +248,7 @@ GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const int Sz)
 				Basis.push_back(state);
 
 				//generate column of hamiltonian elements with all other states
-				Ham.resizeAndPreserve(Basis.size(),Basis.size());//grow the array by one in each direction
+				/*Ham.resizeAndPreserve(Basis.size(),Basis.size());//grow the array by one in each direction
 				//off diagonal elements
 				for (int i=0; i<(Basis.size()-1); i++)// for all basis not including last
 				{
@@ -259,7 +275,7 @@ GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const int Sz)
 				for (b=0; b<(Basis.size())-1; b++) //cycle over all previous basis vectors
 				{
 					element
-				}
+				}*/
 			}
 
 			//Also if found=false, generate hamiltonian elements with all other states
@@ -648,6 +664,6 @@ int main()
 
 	//slightly different implementation of dimensionality
 	//first parameter is now the length of each dimension, so, the square root of the total enumber of elements
-	GENHAM HV(2,J,Q,Sz);
+GENHAM HV(3,J,Q,0.5);
 
 }
