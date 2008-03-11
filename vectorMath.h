@@ -24,6 +24,9 @@ double GENHAM::hamElementGenerator(two states)
 	double element=0; //running total of the matrix element
 	int site2; //index of the next element
 
+	vector <bool> temp1;
+	vector <bool> temp2;
+
 //calculate spin-z component - always there for states identical, just a sign issuee
 //	loop over all bonds to right and down
 	for (int i=0; i<Nsite; i++)
@@ -42,7 +45,7 @@ double GENHAM::hamElementGenerator(two states)
 					site2=( (i+1)%Nsite )*Nsite+j;
 				}
 				//xor them, such that true output gives 1 and false gives -1
-				element=2*state1[site1]^state1[site2]-1;
+				element+=2*state1[site1]^state1[site2]-1;
 
 				//bond flipping term
 				//test to see if up can be made down on (i,j) and partner
@@ -50,11 +53,20 @@ double GENHAM::hamElementGenerator(two states)
 				{
 					//implement switching, get prefactor 1/2
 					//create temp1 the switched state
+					temp1.assign(state1.begin(),state1.end());
+					temp1[site1]=0;
+					temp1[site2]=1;
+					element+=0.5;
 				}
-				else if ( (state1[site1]==1) && (state1[site2]==0))
+				//testing opposite
+				else if ( (state1[site1]==0) && (state1[site2]==1))
 				{
 					//implement switching, get prefactor 1/2
 					//create temp2 the switched state
+					temp2.assign(state1.begin(),state1.end());
+					temp2[site1]=1;
+					temp2[site2]=0;
+					element+=0.5;
 				}
 				//otherwise done
 //TODO I don't think this is a proper implementation.  Investigate further

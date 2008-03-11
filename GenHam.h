@@ -46,11 +46,11 @@ class GENHAM{
 	 void expandVec(int,vector<bool>&);
 	 void collapseVec(int&,vector<bool>&);
 	 double calc_Sz(const vector<bool>&);
-	 void translate(bool, bool, int,vector<bool>&);
+	 void translate(int, int, int,vector<bool>&);
     void gen_daughters(long,vector<vector <bool> >&);
 	 //End of Added TF
 
-    GENHAM(const int,const h_float J_, const h_float Q_,const int Sz); 
+    GENHAM(const int,const h_float J_, const h_float Q_,const double Sz); 
     void printg();
     //double at(const int , const int );
     Array<double,1> apply(const Array<double,1>&);
