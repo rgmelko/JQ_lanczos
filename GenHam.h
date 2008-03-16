@@ -43,11 +43,13 @@ class GENHAM{
 
     bool equal(const vector<bool>&, const vector<bool>&); //poor workaround, see GenHam.cpp for details
 
-	 void expandVec(int,vector<bool>&);
-	 void collapseVec(int&,vector<bool>&);
-	 double calc_Sz(const vector<bool>&);
-	 void translate(int, int, int,vector<bool>&);
-    void gen_daughters(long,vector<vector <bool> >&);
+	 void expandVec(int,vector<bool>&); //converts integer to boolean string, representations of string
+	 void collapseVec(int&,vector<bool>&); //opposite of expandVec
+	 double calc_Sz(const vector<bool>&); //totals the z-spin of the state (for conservations checking)
+	 void translate(int, int, int,vector<bool>&); //rotates a state right or down by integer values
+    void gen_daughters(long,vector<vector <bool> >&); //generates the daughter states of a vector according to some translation rules
+	 void scanTranslation(bool&, bool&, vector<long>, vector<vector <bool> >&, vector<bool>); //Tests translated vector to see if its already in the basis and puts it in daughters
+	 double hamElementGenerator(vector<bool>, vector<bool>);
 	 //End of Added TF
 
     GENHAM(const int,const h_float J_, const h_float Q_,const double Sz); 

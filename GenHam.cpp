@@ -1,6 +1,7 @@
 #include "GenHam.h"
 #include <iostream>
 #include <fstream>
+#include "vectorMath.h"
 
 //----------------------------------------------------------
 //Added TF
@@ -169,13 +170,44 @@ void GENHAM::gen_daughters(long aBasis, vector <vector <bool> >& daughters)
 		{translate(1, 0, Nsite,test);} //translate one right
 	}
 }
+
+void GENHAM::scanTranslation(bool& foundInDaughters, bool& foundInBasis, vector<long> Basis, vector<vector <bool> >& daughters, vector<bool> test)
+//Tests translated vector to see if its already in the basis and puts it in daughters
+{
+	vector<bool> temp;//temporary version of a test for comparisons
+
+	foundInDaughters=false;
+	if (daughters.size()>0)
+	{
+		for (int k=0; k<daughters.size(); k++)
+		{
+			if (equal(test, daughters[k]))
+			{foundInDaughters=true;}
+		}
+	}
+	if (foundInDaughters==false)
+	{
+		daughters.push_back(test);
+	}
+
+	if (foundInBasis==false)
+	{
+		//compare translated state to all basis vectors
+		for (int k=0; k<Basis.size(); k++)
+		{
+			expandVec(Basis[k],temp);//puts expansion into stateVec
+			if (equal(test, temp))
+			{foundInBasis=true;}
+		}
+	}
+}
 //End Added TF
 //----------------------------------------------------------
 GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const double Sz)  
 					: JJ(J_), QQ(Q_) 
 //constructor, TF's
 {
-	Fdim=pow(2.,(Ns*Ns));
+	Fdim=(int)pow(2.,(Ns*Ns));
 	Nsite=Ns; //dimension of lattice, this is a slightly different implementation
 				 //before, Nsite was the dimension of a state
 	
@@ -185,11 +217,12 @@ GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const double Sz
 
 	vector<long> Basis; //define vector to hold parent states in integer form
 	vector<bool> test; //expanded version of an integer as an array of booleans
-	vector<bool> temp; //temporary version of a test for comparisons
 
 	bool foundInBasis; //true if some translation of a state has been found in the basis set on a previous translation (so stop checking)
 	bool foundInDaughters; //true if daughter state already in daughters array
+	vector<bool> temp;//temporary version of a test for comparisons
 
+	Ham; //initialize hamiltonian to zero
 	double element; //running total of hamiltonian matrix element
 
 	for (int state=0; state<Fdim; state++)//cycle through all states
@@ -202,85 +235,76 @@ GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const double Sz
 
 		if (calc_Sz(test)==Sz) //only pay attention to those in the correct spin sector
 		{
-			cout << "Original Vector" << endl;
-			printBoolVector(test);
-			getchar();
-			for (int i=-1; i<3; i=i+3) //for the application of the 1-right operator to get to all possibilities
+			//cout << "Original Vector" << endl;
+			//printBoolVector(test);
+			//getchar();
+			//TODO Improve translation testing, so that parent and daughters are closed set
+			for (int i=-1; i<3; i=i+3) //for the application of the 1-right operator
 			{
-				for (int j=-1; j<3; (j=j+3)) //for the application of the 1-down operator to get to all possibilities
+				for (int j=-1; j<3; (j=j+3)) //for the application of the 1-down operator
 				{
-					foundInDaughters=false;
-					if (daughters.size()>0)
-					{
-						for (int k=0; k<daughters.size(); k++)
-						{
-							if (equal(test, daughters[k]))
-							{foundInDaughters=true;}
-						}
-					}
-					if (foundInDaughters==false)
-					{
-						daughters.push_back(test);
-					}
+					//if unique among daughters, put it in, if found in the basis, rule out this one's parent
+					scanTranslation(foundInDaughters, foundInBasis, Basis, daughters, test);
 
-					if (foundInBasis==false)
-					{
-						//compare translated state to all basis vectors
-						for (int k=0; k<Basis.size(); k++)
-						{
-							expandVec(Basis[k],temp);//puts expansion into stateVec
-							if (equal(test, temp))
-							{foundInBasis=true;}
-						}
-					}
-					cout << "Translating by y=" << j << endl;
+					//cout << "Translating by y=" << j << endl;
 					translate(0, j, Nsite, test); //translate one down or up
-					printBoolVector(test);
+					//printBoolVector(test);
 				}
-				cout << "Translating by x=" << i << endl;
+				//cout << "Translating by x=" << i << endl;
 				translate(i, 0, Nsite,test); //translate one rightt
-				printBoolVector(test);
+				//printBoolVector(test);
 			}
 
 			//if this point is reached, and found!=true, then no translation of state is in the basis set so far
 			if (foundInBasis==false)
 			{
 				Basis.push_back(state);
+				int BasisSize=Basis.size();
 
 				//generate column of hamiltonian elements with all other states
-				/*Ham.resizeAndPreserve(Basis.size(),Basis.size());//grow the array by one in each direction
+	cout << "Before resizing: " << endl << Ham << endl;
+				Ham.resizeAndPreserve(Basis.size(),Basis.size());//grow the array by one in each direction
+	cout << "After resizing: " << endl << Ham << endl;
 				//off diagonal elements
 				for (int i=0; i<(Basis.size()-1); i++)// for all basis not including last
 				{
-					Ham[i][state]=0; //set element to 0
-					gen_daughters(Basis[i],daughters1);
+					Ham(i,BasisSize)=0; //set element to 0
+					gen_daughters(Basis[i],daughters1);//generate daughters of second state, since first state was generated in discovery process, and not yet cleared
 					for (int d1=0; d1<daughters.size(); d1++) //for all combinations of daughter and daughter1 members
 					{
-						for (int d2=0; d2<daughters1.size(); d2++)
+						for (int d2=d1; d2<daughters1.size(); d2++)
 						{
-							//TODO This is the weak spot of this code, what's HeisHam?!?
-							Ham[i][state]+=innerProduct(daughters1[d2],HeisHam,daughters[d1]); // add the contribution of this daughter-pair
+							cout << "States : " << endl;
+							printBoolVector(daughters1[d2]);
+							printBoolVector(daughters[d1]);
+							Ham(i,BasisSize)+=hamElementGenerator(daughters1[d2], daughters[d1]);// add the contribution of this daughter-pair
+							cout << "Should give hamElement: " << hamElementGenerator(daughters1[d2], daughters[d1])<< " at " << i << "x" << Basis.size() << endl;
 						}
 					}
-					Ham[state][i]=Ham[i][state]; //duplicate in lower half of matrix
+					Ham(BasisSize,i)=Ham(i,BasisSize); //duplicate in lower half of matrix
+	cout << "After off-diagonal generation: " << endl << Ham << endl;
 				}
-				//diagonal element - set aside since daughters already generated
-				Ham[state][state]=0; //set element to 0
-				for (int d=0; d<daughters.size(); d++) //for all internal combinations of daughter members
+/*				//diagonal element - set aside since daughters already generated
+				Ham(BasisSize,BasisSize)=0; //set element to 0
+				for (int d1=0; d1<daughters.size(); d1++) //for all combinations of daughter and daughter1 members
 				{
-					//TODO This is the weak spot of this code, what's HeisHam?!?
-					Ham[i][state]+=innerProduct(daughters[d],Ham,daughters[d]); //add the contribution of this daughter-pair
+					for (int d2=d1; d2<daughters.size(); d2++)
+					{
+						cout << "States : " << endl;
+						printBoolVector(daughters[d2]);
+						printBoolVector(daughters[d1]);
+						cout << "Should give hamElement: " << hamElementGenerator(daughters[d2], daughters[d1])<< " at " << state << "x" << state << endl;
+						Ham(BasisSize,BasisSize)+=hamElementGenerator(daughters[d2], daughters[d1]); //add the contribution of this daughter-pair
+					}
 				}
-
-				for (b=0; b<(Basis.size())-1; b++) //cycle over all previous basis vectors
-				{
-					element
-				}*/
+	cout << "After diagonal generation: " << endl << Ham << endl;
+*/
 			}
 
-			//Also if found=false, generate hamiltonian elements with all other states
 		}
 	}
+	cout << "At end: " << Ham << endl;
+	/*
 	printLongVector(Basis);
 	for (int i=0; i<Basis.size(); i++)
 	{
@@ -290,7 +314,24 @@ GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const double Sz
 		cout << "Daughters1" << endl;
 		gen_daughters(Basis[i],daughters1);
 		printBoolArray(daughters1);
-	}
+	}*/
+
+	//testing section for hamiltonian element generator
+
+	/*cout << "Here's a quick attempt to test hamiltonian generator.  Test on " << Basis[0] << "&" << Basis[2] << endl;
+
+	expandVec(Basis[0],temp);
+	printBoolVector(temp);
+	vector<bool> temp1;
+	expandVec(Basis[2],temp1);
+	printBoolVector(temp1);
+
+	element=hamElementGenerator(temp, temp1);
+
+	cout << "The result is " << element << endl;
+	getchar();
+	*/
+
 }
 /*//create bases and determine dim of full Hilbert space
 {
@@ -664,6 +705,6 @@ int main()
 
 	//slightly different implementation of dimensionality
 	//first parameter is now the length of each dimension, so, the square root of the total enumber of elements
-GENHAM HV(3,J,Q,0.5);
+GENHAM HV(2,J,Q,Sz);
 
 }
