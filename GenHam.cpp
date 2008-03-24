@@ -23,14 +23,15 @@ void GENHAM::printBoolVector(const vector <bool>& aV)
 	cout << endl << endl;
 }
 
-void GENHAM::printBoolArray(const vector <vector<bool> >& aV)
+void GENHAM::printBoolArray(const vector <vector<bool> >& aV, const vector<double>& aCoeffs)
 //Prints a set of daughter states
 {
 	for (int i=0; i<aV.size(); i++)
 	{
+		cout << aCoeffs[i] << " | ";
 		for (int j=0; j<aV[i].size(); j++)
 		{cout << aV[i][j] << " ";}
-		cout << endl;
+		cout << " >" << endl;
 	}
 	//cout << endl;
 }
@@ -75,49 +76,57 @@ double GENHAM::calc_Sz(const vector <bool>& stateVec)
 	return total;
 }
 
-void GENHAM::translate(int x, int y, int n, vector <bool>& stateVec)
+void GENHAM::translate(int x, int y, int n, vector <bool>& stateVec, double& coeff, const vector<double>& K_sect)
 //translate statevector of nxn lattice right x and down y
-//TODO generalize this to x,y>1
-// will require as many temp's as there are shifts in that direction
 {
 	bool temp; //for bit shifting
 
-	if (x<0)
-	{	x=Nsite+x;}
-	if (y<0)
-	{	y=Nsite+y;}
+	do
+	{
+		if (x<0)
+		{	x=Nsite+x;}
+		if (y<0)
+		{	y=Nsite+y;}
+	}while ((x<0) || (y<0));
 
-	if (x!=0)
-	{  //x-translations
-		for (int row=0; row<n; row++)
+	//if (x!=0)
+	//{  
+	//x-translations
+		for (int i=0; i<x; i++)//perform translation x times
 		{
-			for (int i=0; i<x; i++)//perform translation x times
+			for (int row=0; row<n; row++)
 			{
 				temp=stateVec[n*row+n-1]; //save the last bit in the row
 				for (int column=n-1; column>=(0+1); column--)//shift everything in the row right one bit
 				{stateVec[n*row+column]=stateVec[n*row+column-1];}
 				stateVec[n*row]=temp;
 			}
+			if (K_sect[0]==1)
+			{	coeff*=(-1);}
 		}
-	}
+	//}
 
-	if (y!=0)
-	{//y-translations
-		for (int column=0; column<n; column++)
+	//if (y!=0)
+	//{
+	//y-translations
+		for (int i=0; i<y; i++)//perform translation x times
 		{
-			for (int i=0; i<y; i++)//perform translation x times
+			for (int column=0; column<n; column++)
 			{
 				temp=stateVec[n*(n-1)+column]; //save the last bit in each column
 				for (int row=n-1; row>=(0+1); row--) //shift everything down one bit
 				{stateVec[n*row+column]=stateVec[n*(row-1)+column];}
 				stateVec[column]=temp;
 			}
+			if (K_sect[1]==1)
+			{	coeff*=(-1);}
 		}
-	}
+	//}
 }
-//TODO Vector operators = and == are not working
-//this is a workaround for the latter
+
 bool GENHAM::equal(const vector <bool>& v1, const vector <bool>& v2)
+//tests equality of v1 and v2
+//TODO integrate comparison of coefficients too
 {
 	bool same=false;
 
@@ -133,13 +142,16 @@ bool GENHAM::equal(const vector <bool>& v1, const vector <bool>& v2)
 	return same;
 }
 
-void GENHAM::gen_daughters(long aBasis, vector <vector <bool> >& daughters)
+void GENHAM::gen_daughters(long aBasis, vector <vector <bool> >& daughters, vector<double>& coeffs, const vector<double>& K_sect)
 //accepts integer and finds all translated versions thereof
 {
 	daughters.clear();
+	coeffs.clear();
 
 	vector <bool> test;
+	double testCoeff;
 	expandVec(aBasis,test);
+	testCoeff=1;
 	bool foundInDaughters;
 
 	for (int i=0; i<Nsite; i++) //for the application of the 1-right operator to get to all possibilities
@@ -161,33 +173,38 @@ void GENHAM::gen_daughters(long aBasis, vector <vector <bool> >& daughters)
 			if (foundInDaughters==false)
 			{
 				daughters.push_back(test);
+				coeffs.push_back(testCoeff);
 			}
 
 			if ((j+1)<Nsite) //to avoid unnessessary last rotation
-			{ translate(0, 1, Nsite, test);} //translate one down
+			{	translate(0,1,Nsite,test,testCoeff,K_sect);} //translate one down
 		}
 		if ((i+1)<Nsite) //to avoid unnessessary last rotation
-		{translate(1, 0, Nsite,test);} //translate one right
+		{	translate(1,0,Nsite,test,testCoeff,K_sect);} //translate one right
 	}
 }
 
-void GENHAM::scanTranslation(bool& foundInDaughters, bool& foundInBasis, vector<long> Basis, vector<vector <bool> >& daughters, vector<bool> test)
+void GENHAM::scanTranslation(	bool& foundInBasis, vector<long> Basis, vector<vector <bool> >& daughters, vector<double>& dCoeffs,
+										vector<bool>& test, double& testCoeff)
 //Tests translated vector to see if its already in the basis and puts it in daughters
 {
 	vector<bool> temp;//temporary version of a test for comparisons
 
-	foundInDaughters=false;
-	if (daughters.size()>0)
-	{
+	bool foundInDaughters=false;//true if daughter state already in daughters array
+//	if (daughters.size()>0)
+//	{
 		for (int k=0; k<daughters.size(); k++)
 		{
+			if (daughters.size()==0)
+			{cout << "Apparently if statement was needed after all." << endl; getchar();}
 			if (equal(test, daughters[k]))
 			{foundInDaughters=true;}
 		}
-	}
+//	}
 	if (foundInDaughters==false)
 	{
 		daughters.push_back(test);
+		dCoeffs.push_back(testCoeff);
 	}
 
 	if (foundInBasis==false)
@@ -203,7 +220,7 @@ void GENHAM::scanTranslation(bool& foundInDaughters, bool& foundInBasis, vector<
 }
 //End Added TF
 //----------------------------------------------------------
-GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const double Sz)  
+GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const double Sz, const vector<double>& K_sect)  
 					: JJ(J_), QQ(Q_) 
 //constructor, TF's
 {
@@ -212,14 +229,15 @@ GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const double Sz
 				 //before, Nsite was the dimension of a state
 	
 	cout << "Hamiltonian Generator Starting." << endl;
-	cout << "Important parameters: Ns: " << Ns << " Sz: " << Sz << endl;
+	cout << "Important parameters: Ns: " << Ns << " Sz: " << Sz << " K_sect: (" << K_sect[0] << "," << K_sect[1] << ")" << endl;
 	getchar();
 
 	vector<long> Basis; //define vector to hold parent states in integer form
 	vector<bool> test; //expanded version of an integer as an array of booleans
+	double testCoeff; //coefficient of daughter function to be tested
 
 	bool foundInBasis; //true if some translation of a state has been found in the basis set on a previous translation (so stop checking)
-	bool foundInDaughters; //true if daughter state already in daughters array
+	
 	vector<bool> temp;//temporary version of a test for comparisons
 
 	Ham; //initialize hamiltonian to zero
@@ -229,29 +247,32 @@ GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const double Sz
 	{
 		//clear daughters and reset foundInBasis to false
 		daughters.clear();
+		dCoeffs.clear();
 		foundInBasis=false;
 
 		expandVec(state,test); //convert state from integer to bit string
+		testCoeff=1;//assumed coefficient, will be inverted by some translations
 
 		if (calc_Sz(test)==Sz) //only pay attention to those in the correct spin sector
 		{
 			//cout << "Original Vector" << endl;
 			//printBoolVector(test);
 			//getchar();
-			//TODO Improve translation testing, so that parent and daughters are closed set
-			for (int i=-1; i<3; i=i+3) //for the application of the 1-right operator
+			for (int i=0; i<Nsite; i++) //for the application of the 1-right operator
 			{
-				for (int j=-1; j<3; (j=j+3)) //for the application of the 1-down operator
+				for (int j=0; j<Nsite; j++) //for the application of the 1-down operator
 				{
 					//if unique among daughters, put it in, if found in the basis, rule out this one's parent
-					scanTranslation(foundInDaughters, foundInBasis, Basis, daughters, test);
+					scanTranslation(foundInBasis, Basis, daughters, dCoeffs, test, testCoeff);
 
 					//cout << "Translating by y=" << j << endl;
-					translate(0, j, Nsite, test); //translate one down or up
+					if ((j+1)<Nsite) //to avoid unnessessary last rotation
+					{	translate(0,1,Nsite,test,testCoeff,K_sect);} //translate one down
 					//printBoolVector(test);
 				}
 				//cout << "Translating by x=" << i << endl;
-				translate(i, 0, Nsite,test); //translate one rightt
+				if ((i+1)<Nsite) //to avoid unnessessary last rotation
+				{	translate(1,0,Nsite,test,testCoeff,K_sect);} //translate one right
 				//printBoolVector(test);
 			}
 
@@ -262,7 +283,7 @@ GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const double Sz
 				int BasisSize=Basis.size();
 
 				//generate column of hamiltonian elements with all other states
-	cout << "Before resizing: " << endl << Ham << endl;
+/*	cout << "Before resizing: " << endl << Ham << endl;
 				Ham.resizeAndPreserve(Basis.size(),Basis.size());//grow the array by one in each direction
 	cout << "After resizing: " << endl << Ham << endl;
 				//off diagonal elements
@@ -284,7 +305,7 @@ GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const double Sz
 					Ham(BasisSize,i)=Ham(i,BasisSize); //duplicate in lower half of matrix
 	cout << "After off-diagonal generation: " << endl << Ham << endl;
 				}
-/*				//diagonal element - set aside since daughters already generated
+*//*				//diagonal element - set aside since daughters already generated
 				Ham(BasisSize,BasisSize)=0; //set element to 0
 				for (int d1=0; d1<daughters.size(); d1++) //for all combinations of daughter and daughter1 members
 				{
@@ -303,8 +324,8 @@ GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const double Sz
 
 		}
 	}
-	cout << "At end: " << Ham << endl;
-	/*
+//	cout << "At end: " << Ham << endl;
+	
 	printLongVector(Basis);
 	for (int i=0; i<Basis.size(); i++)
 	{
@@ -312,9 +333,9 @@ GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const double Sz
 		expandVec(Basis[i],temp);
 		printBoolVector(temp);
 		cout << "Daughters1" << endl;
-		gen_daughters(Basis[i],daughters1);
-		printBoolArray(daughters1);
-	}*/
+		gen_daughters(Basis[i],daughters1,d1Coeffs,K_sect);
+		printBoolArray(daughters1,d1Coeffs);
+	}
 
 	//testing section for hamiltonian element generator
 
@@ -697,14 +718,17 @@ int main()
 	PARAMS prm;
 	double J;
 	double Q;
+	vector <double> K_Sect(2); //Two element array of K-sector, in multiples of pi TODO Generalize to more than just (0,0),(0,pi),(pi,0),(pi,pi)
 	int Sz;
  
 	J=prm.JJ_;
 	Q=-prm.QQ_;// SIGN HAS TO BE FLIPPED: NOW SIGN AT INPUT IS SAME AS PAPER 
 	Sz=prm.Sz_;
+	K_Sect[0]=0;//prm.K_SectX;
+	K_Sect[1]=1;//prm.K_SectY;
 
 	//slightly different implementation of dimensionality
 	//first parameter is now the length of each dimension, so, the square root of the total enumber of elements
-GENHAM HV(2,J,Q,Sz);
+	GENHAM HV(2,J,Q,Sz,K_Sect);
 
 }
