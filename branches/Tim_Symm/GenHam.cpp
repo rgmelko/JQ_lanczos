@@ -89,8 +89,6 @@ void GENHAM::translate(int x, int y, int n, vector <bool>& stateVec, double& coe
 		{	y=Nsite+y;}
 	}while ((x<0) || (y<0));
 
-	//if (x!=0)
-	//{  
 	//x-translations
 		for (int i=0; i<x; i++)//perform translation x times
 		{
@@ -104,10 +102,7 @@ void GENHAM::translate(int x, int y, int n, vector <bool>& stateVec, double& coe
 			if (K_sect[0]==1)
 			{	coeff*=(-1);}
 		}
-	//}
 
-	//if (y!=0)
-	//{
 	//y-translations
 		for (int i=0; i<y; i++)//perform translation x times
 		{
@@ -121,7 +116,6 @@ void GENHAM::translate(int x, int y, int n, vector <bool>& stateVec, double& coe
 			if (K_sect[1]==1)
 			{	coeff*=(-1);}
 		}
-	//}
 }
 
 bool GENHAM::equal(const vector <bool>& v1, const vector <bool>& v2)
@@ -191,16 +185,11 @@ void GENHAM::scanTranslation(	bool& foundInBasis, vector<long> Basis, vector<vec
 	vector<bool> temp;//temporary version of a test for comparisons
 
 	bool foundInDaughters=false;//true if daughter state already in daughters array
-//	if (daughters.size()>0)
-//	{
-		for (int k=0; k<daughters.size(); k++)
-		{
-			if (daughters.size()==0)
-			{cout << "Apparently if statement was needed after all." << endl; getchar();}
-			if (equal(test, daughters[k]))
-			{foundInDaughters=true;}
-		}
-//	}
+	for (int k=0; k<daughters.size(); k++)
+	{
+		if (equal(test, daughters[k]))
+		{foundInDaughters=true;}
+	}
 	if (foundInDaughters==false)
 	{
 		daughters.push_back(test);
@@ -240,7 +229,7 @@ GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const double Sz
 	
 	vector<bool> temp;//temporary version of a test for comparisons
 
-	Ham; //initialize hamiltonian to zero
+	//Ham; //initialize hamiltonian to zero
 	double element; //running total of hamiltonian matrix element
 
 	for (int state=0; state<Fdim; state++)//cycle through all states
@@ -283,14 +272,14 @@ GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const double Sz
 				int BasisSize=Basis.size();
 
 				//generate column of hamiltonian elements with all other states
-/*	cout << "Before resizing: " << endl << Ham << endl;
+	cout << "Before resizing: " << endl << Ham << endl;
 				Ham.resizeAndPreserve(Basis.size(),Basis.size());//grow the array by one in each direction
 	cout << "After resizing: " << endl << Ham << endl;
 				//off diagonal elements
 				for (int i=0; i<(Basis.size()-1); i++)// for all basis not including last
 				{
 					Ham(i,BasisSize)=0; //set element to 0
-					gen_daughters(Basis[i],daughters1);//generate daughters of second state, since first state was generated in discovery process, and not yet cleared
+/*					gen_daughters(Basis[i],daughters1,d1Coeffs,K_sect);//generate daughters of second state, since first state was generated in discovery process, and not yet cleared
 					for (int d1=0; d1<daughters.size(); d1++) //for all combinations of daughter and daughter1 members
 					{
 						for (int d2=d1; d2<daughters1.size(); d2++)
@@ -298,35 +287,41 @@ GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const double Sz
 							cout << "States : " << endl;
 							printBoolVector(daughters1[d2]);
 							printBoolVector(daughters[d1]);
-							Ham(i,BasisSize)+=hamElementGenerator(daughters1[d2], daughters[d1]);// add the contribution of this daughter-pair
-							cout << "Should give hamElement: " << hamElementGenerator(daughters1[d2], daughters[d1])<< " at " << i << "x" << Basis.size() << endl;
+							Ham(i,BasisSize)+=hamElementGenerator(daughters1[d2],d1Coeffs[d2],daughters[d1],dCoeffs[d1]);// add the contribution of this daughter-pair
+							cout << "Should give hamElement: " << hamElementGenerator(daughters1[d2],d1Coeffs[d2],daughters[d1],dCoeffs[d1]) << " at " << i << "x" << Basis.size() << endl;
 						}
 					}
 					Ham(BasisSize,i)=Ham(i,BasisSize); //duplicate in lower half of matrix
-	cout << "After off-diagonal generation: " << endl << Ham << endl;
+	cout << "After off-diagonal generation: " << endl << Ham << endl;*/
 				}
-*//*				//diagonal element - set aside since daughters already generated
+				//diagonal element - set aside since daughters already generated
+						int d2=0;
+						printBoolVector(daughters[d2]);
+						printBoolVector(daughters[0]);
+				cout << "Fine until here." << endl;
 				Ham(BasisSize,BasisSize)=0; //set element to 0
+				cout << "Made it to here?" << endl;
 				for (int d1=0; d1<daughters.size(); d1++) //for all combinations of daughter and daughter1 members
 				{
 					for (int d2=d1; d2<daughters.size(); d2++)
 					{
 						cout << "States : " << endl;
+						cout << "Attempting to access daughters element d2=" << d2 << " where the size of daughters is " << daughters.size() << endl;
 						printBoolVector(daughters[d2]);
 						printBoolVector(daughters[d1]);
-						cout << "Should give hamElement: " << hamElementGenerator(daughters[d2], daughters[d1])<< " at " << state << "x" << state << endl;
-						Ham(BasisSize,BasisSize)+=hamElementGenerator(daughters[d2], daughters[d1]); //add the contribution of this daughter-pair
+						//cout << "Should give hamElement: " << hamElementGenerator(daughters[d2],d1Coeffs[d2],daughters[d1],dCoeffs[d1])<< " at " << state << "x" << state << endl;
+						//Ham(BasisSize,BasisSize)+=hamElementGenerator(daughters[d2],d1Coeffs[d2],daughters[d1],dCoeffs[d1]); //add the contribution of this daughter-pair
 					}
 				}
 	cout << "After diagonal generation: " << endl << Ham << endl;
-*/
+
 			}
 
 		}
 	}
 //	cout << "At end: " << Ham << endl;
 	
-	printLongVector(Basis);
+	/*printLongVector(Basis);
 	for (int i=0; i<Basis.size(); i++)
 	{
 		cout << "Basis state " << Basis[i] << endl;
@@ -335,7 +330,7 @@ GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const double Sz
 		cout << "Daughters1" << endl;
 		gen_daughters(Basis[i],daughters1,d1Coeffs,K_sect);
 		printBoolArray(daughters1,d1Coeffs);
-	}
+	}*/
 
 	//testing section for hamiltonian element generator
 
@@ -386,7 +381,7 @@ GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const double Sz
 
 //----------------------------------------------------------
 
-void GENHAM::printg()
+/*void GENHAM::printg()
 {
   int i,j;
   vector<int> tempP;
@@ -708,7 +703,7 @@ double GENHAM::HOFFdPlaq(const int si, const long bra){
   return valH;
 
 }//HOFFdPart
-
+*/
 #include "simparam.h"
 
 int main()
