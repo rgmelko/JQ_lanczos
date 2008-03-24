@@ -279,7 +279,7 @@ GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const double Sz
 				for (int i=0; i<(Basis.size()-1); i++)// for all basis not including last
 				{
 					Ham(i,BasisSize)=0; //set element to 0
-/*					gen_daughters(Basis[i],daughters1,d1Coeffs,K_sect);//generate daughters of second state, since first state was generated in discovery process, and not yet cleared
+					gen_daughters(Basis[i],daughters1,d1Coeffs,K_sect);//generate daughters of second state, since first state was generated in discovery process, and not yet cleared
 					for (int d1=0; d1<daughters.size(); d1++) //for all combinations of daughter and daughter1 members
 					{
 						for (int d2=d1; d2<daughters1.size(); d2++)
@@ -292,7 +292,7 @@ GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const double Sz
 						}
 					}
 					Ham(BasisSize,i)=Ham(i,BasisSize); //duplicate in lower half of matrix
-	cout << "After off-diagonal generation: " << endl << Ham << endl;*/
+	cout << "After off-diagonal generation: " << endl << Ham << endl;
 				}
 				//diagonal element - set aside since daughters already generated
 						int d2=0;
@@ -309,8 +309,8 @@ GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const double Sz
 						cout << "Attempting to access daughters element d2=" << d2 << " where the size of daughters is " << daughters.size() << endl;
 						printBoolVector(daughters[d2]);
 						printBoolVector(daughters[d1]);
-						//cout << "Should give hamElement: " << hamElementGenerator(daughters[d2],d1Coeffs[d2],daughters[d1],dCoeffs[d1])<< " at " << state << "x" << state << endl;
-						//Ham(BasisSize,BasisSize)+=hamElementGenerator(daughters[d2],d1Coeffs[d2],daughters[d1],dCoeffs[d1]); //add the contribution of this daughter-pair
+						cout << "Should give hamElement: " << hamElementGenerator(daughters[d2],d1Coeffs[d2],daughters[d1],dCoeffs[d1])<< " at " << state << "x" << state << endl;
+						Ham(BasisSize,BasisSize)+=hamElementGenerator(daughters[d2],d1Coeffs[d2],daughters[d1],dCoeffs[d1]); //add the contribution of this daughter-pair
 					}
 				}
 	cout << "After diagonal generation: " << endl << Ham << endl;
