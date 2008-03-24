@@ -19,7 +19,7 @@ bool innerProductStates(vector <bool> aV1, vector <bool> aV2)
 	return result;
 }
 
-double GENHAM::hamElementGenerator(vector <bool> state1, vector <bool> state2)
+double GENHAM::hamElementGenerator(vector <bool> state1, double coeff1, vector <bool> state2, double coeff2)
 //wrapper for inner product across a matrix
 {
 	double element=0; //running total of the matrix element
@@ -70,7 +70,7 @@ double GENHAM::hamElementGenerator(vector <bool> state1, vector <bool> state2)
 					temp1.assign(state1.begin(),state1.end());
 					temp1[site1]=0;
 					temp1[site2]=1;
-					tempElement=0.5*equal(state2,temp1);
+					tempElement=0.5*equal(state2,temp1)*coeff1*coeff2;
 					element+=tempElement;
 				}
 				//testing opposite
@@ -82,7 +82,7 @@ double GENHAM::hamElementGenerator(vector <bool> state1, vector <bool> state2)
 					temp1.assign(state1.begin(),state1.end());
 					temp1[site1]=1;
 					temp1[site2]=0;
-					tempElement=0.5*equal(state2,temp1);
+					tempElement=0.5*equal(state2,temp1)*coeff1*coeff2;
 					element+=tempElement;
 				}
 				//cout << "Kinetic term added: " << tempElement << endl << endl;
