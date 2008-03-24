@@ -35,24 +35,26 @@ class GENHAM{
 
     //Added TF
 	 vector< vector<bool> > daughters; //vector of a parent and its daughter states
+	 vector<double> dCoeffs; //coefficients of daughters states
 	 vector< vector<bool> > daughters1; //same, but for another set, uused for Hamiltonian generation
+	 vector<double> d1Coeffs; //coefficients of daughters1 states
 	 vector<bool> stateVec; //workspace for functions, since I can't figure out how to pass vectors
 
     void printBoolVector(const vector<bool>&);
-	 void printBoolArray(const vector<vector <bool> >&);
+	 void printBoolArray(const vector<vector <bool> >&, const vector<double>&);
 
     bool equal(const vector<bool>&, const vector<bool>&); //poor workaround, see GenHam.cpp for details
 
 	 void expandVec(int,vector<bool>&); //converts integer to boolean string, representations of string
 	 void collapseVec(int&,vector<bool>&); //opposite of expandVec
 	 double calc_Sz(const vector<bool>&); //totals the z-spin of the state (for conservations checking)
-	 void translate(int, int, int,vector<bool>&); //rotates a state right or down by integer values
-    void gen_daughters(long,vector<vector <bool> >&); //generates the daughter states of a vector according to some translation rules
-	 void scanTranslation(bool&, bool&, vector<long>, vector<vector <bool> >&, vector<bool>); //Tests translated vector to see if its already in the basis and puts it in daughters
+	 void translate(int, int, int,vector<bool>&,double&,const vector<double>&); //rotates a state right or down by integer values
+    void gen_daughters(long,vector<vector <bool> >&,vector<double>&,const vector<double>&); //generates the daughter states of a vector according to some translation rules
+	 void scanTranslation(bool&,vector<long>,vector<vector <bool> >&,vector<double>&,vector<bool>&,double&); //Tests translated vector to see if its already in the basis and puts it in daughters
 	 double hamElementGenerator(vector<bool>, vector<bool>);
 	 //End of Added TF
 
-    GENHAM(const int,const h_float J_, const h_float Q_,const double Sz); 
+    GENHAM(const int,const h_float J_, const h_float Q_,const double Sz,const vector<double>&); 
     void printg();
     //double at(const int , const int );
     Array<double,1> apply(const Array<double,1>&);
