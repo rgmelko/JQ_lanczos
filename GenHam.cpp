@@ -26,6 +26,10 @@ void GENHAM::printBoolVector(const vector <bool>& aV)
 void GENHAM::printBoolArray(const vector <vector<bool> >& aV, const vector<double>& aCoeffs)
 //Prints a set of daughter states
 {
+	if (aV.size()==0)
+	{
+		cout << "This vector is empty." << endl;
+	}
 	for (int i=0; i<aV.size(); i++)
 	{
 		cout << aCoeffs[i] << " | ";
@@ -100,7 +104,9 @@ void GENHAM::translate(int x, int y, int n, vector <bool>& stateVec, double& coe
 				stateVec[n*row]=temp;
 			}
 			if (K_sect[0]==1)
-			{	coeff*=(-1);}
+			{	coeff*=-1;}
+//			else
+//			{	coeff=1;}
 		}
 
 	//y-translations
@@ -114,7 +120,9 @@ void GENHAM::translate(int x, int y, int n, vector <bool>& stateVec, double& coe
 				stateVec[column]=temp;
 			}
 			if (K_sect[1]==1)
-			{	coeff*=(-1);}
+			{	coeff*=-1;}
+//			else
+//			{	coeff=1;}
 		}
 }
 
@@ -161,8 +169,26 @@ void GENHAM::gen_daughters(long aBasis, vector <vector <bool> >& daughters, vect
 				if (equal(test, daughters[k]))
 				{
 					foundInDaughters=true;
+					coeffs.at(k)+=testCoeff;
+					if (coeffs.at(k)==0)
+					{
+						/*cout << "This coefficient (" << k << ") just got blocked out." << endl;
+						printBoolVector(test);
+						printBoolVector(daughters[k]);
+						printBoolArray(daughters,coeffs);
+						//for (int c=0; c<coeffs.size();c++)
+						//{	cout << coeffs.at(c) << " ";}
+						//cout << endl;
+						cout << "Attempting to remove entry now. Press any key to continue." << endl;
+						getchar();*/
+						daughters.erase(daughters.begin()+k);
+						coeffs.erase(coeffs.begin()+k);
+						/*cout << "Should be gone now." << endl;
+						printBoolArray(daughters,coeffs);
+						cout << "Is that it? Press any key." << endl;
+						getchar();*/
+					}
 				}
-
 			}
 			if (foundInDaughters==false)
 			{
@@ -187,8 +213,16 @@ void GENHAM::scanTranslation(	bool& foundInBasis, vector<long> Basis, vector<vec
 	bool foundInDaughters=false;//true if daughter state already in daughters array
 	for (int k=0; k<daughters.size(); k++)
 	{
-		if (equal(test, daughters[k]))
-		{foundInDaughters=true;}
+		if (equal(test, daughters[k]))//if it's already in the daughters array, then add the new coefficient to it
+		{
+			foundInDaughters=true;
+			dCoeffs.at(k)+=testCoeff;
+			if (dCoeffs.at(k)==0)//if a daughter state has been elminated, remove it from the set, this does not preclude it being added back later
+			{
+				daughters.erase(daughters.begin()+k);
+				dCoeffs.erase(dCoeffs.begin()+k);
+			}
+		}
 	}
 	if (foundInDaughters==false)
 	{
@@ -196,7 +230,7 @@ void GENHAM::scanTranslation(	bool& foundInBasis, vector<long> Basis, vector<vec
 		dCoeffs.push_back(testCoeff);
 	}
 
-	if (foundInBasis==false)
+	if ((foundInBasis==false)&&(daughters.size()>0))//second term makes sure that the daughter states haven't subraacted off due to phases
 	{
 		//compare translated state to all basis vectors
 		for (int k=0; k<Basis.size(); k++)
@@ -247,6 +281,7 @@ GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const double Sz
 			//cout << "Original Vector" << endl;
 			//printBoolVector(test);
 			//getchar();
+			//IMPORTANT!! There must be no double counting as the states are cycled through, otherwise coefficients won't add up properly
 			for (int i=0; i<Nsite; i++) //for the application of the 1-right operator
 			{
 				for (int j=0; j<Nsite; j++) //for the application of the 1-down operator
@@ -266,66 +301,48 @@ GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const double Sz
 			}
 
 			//if this point is reached, and found!=true, then no translation of state is in the basis set so far
-			if (foundInBasis==false)
+			if ((foundInBasis==false)&&(daughters.size()>0)) //if there are no surviving daughters, then the basis does not contribute
 			{
 				Basis.push_back(state);
 				int BasisSize=Basis.size();
 
 				//generate column of hamiltonian elements with all other states
-	cout << "Before resizing: " << endl << Ham << endl;
 				Ham.resizeAndPreserve(Basis.size(),Basis.size());//grow the array by one in each direction
-	cout << "After resizing: " << endl << Ham << endl;
 				//off diagonal elements
-/*				for (int i=0; i<(Basis.size()-1); i++)// for all basis not including last
+				for (int i=0; i<(Basis.size()-1); i++)// for all basis not including last
 				{
-					//Ham(i,BasisSize)=0; //set element to 0
+					Ham(i,BasisSize-1)=0; //set element to 0
 					gen_daughters(Basis[i],daughters1,d1Coeffs,K_sect);//generate daughters of second state, since first state was generated in discovery process, and not yet cleared
 					for (int d1=0; d1<daughters.size(); d1++) //for all combinations of daughter and daughter1 members
 					{
 						for (int d2=d1; d2<daughters1.size(); d2++)
 						{
-							cout << "States : " << endl;
-							printBoolVector(daughters1[d2]);
-							printBoolVector(daughters[d1]);
-							Ham(i,BasisSize-1)+=hamElementGenerator(daughters1[d2],d1Coeffs[d2],daughters[d1],dCoeffs[d1]);// add the contribution of this daughter-pair
-							cout << "Should give hamElement: " << hamElementGenerator(daughters1[d2],d1Coeffs[d2],daughters[d1],dCoeffs[d1]) << " at " << i << "x" << Basis.size() << endl;
+							//cout << "States : " << endl;
+							//printBoolVector(daughters1[d2]);
+							//printBoolVector(daughters[d1]);
+							Ham(i,BasisSize-1)+=1.1;//hamElementGenerator(daughters1[d2],d1Coeffs[d2],daughters[d1],dCoeffs[d1]);// add the contribution of this daughter-pair
+							//cout << "Should give hamElement: " << hamElementGenerator(daughters1[d2],d1Coeffs[d2],daughters[d1],dCoeffs[d1]) << " at " << i << "x" << Basis.size() << endl;
 						}
 					}
 					Ham(BasisSize-1,i)=Ham(i,BasisSize-1); //duplicate in lower half of matrix
-	cout << "After off-diagonal generation: " << endl << Ham << endl;
-				}*/
+				}
 				//diagonal element - set aside since daughters already generated
-						int d2=0;
-						printBoolVector(daughters[d2]);
-						printBoolVector(daughters[0]);
-				cout << "Fine until here." << endl;
 				Ham(BasisSize-1,BasisSize-1)=0; //set element to 0
-				cout << "Made it to here?" << endl;
 				for (int d1=0; d1<daughters.size(); d1++) //for all combinations of daughter and daughter1 members
 				{
 					for (int d2=d1; d2<daughters.size(); d2++)
 					{
-						cout << "States : " << endl;
-						cout << "d1= " << d1 << " daughters.size()= " << daughters.size() << endl;
-//						cout << "d2= " << d2 << " daughters.size()= " << daughters.size() << endl;
-//						cout << "d1Coeffs= " << d2 << " d1Coeffs.size()= " << d1Coeffsaughters.size() << endl;
-//						cout << "d2= " << d2 << " daughters.size()= " << daughters.size() << endl;
-
-						printBoolVector(daughters.at(d2));
-						printBoolVector(daughters.at(d1));
-						cout << "Should give hamElement: " << hamElementGenerator(daughters.at(d2),dCoeffs.at(d2),daughters.at(d1),dCoeffs.at(d1));//<< " at " << state << "x" << state << endl;
-						Ham(BasisSize-1,BasisSize-1)+=hamElementGenerator(daughters.at(d2),dCoeffs.at(d2),daughters.at(d1),dCoeffs.at(d1)); //add the contribution of this daughter-pair
+						//cout << "Should give hamElement: " << hamElementGenerator(daughters.at(d2),dCoeffs.at(d2),daughters.at(d1),dCoeffs.at(d1));//<< " at " << state << "x" << state << endl;
+						Ham(BasisSize-1,BasisSize-1)+=1;//hamElementGenerator(daughters.at(d2),dCoeffs.at(d2),daughters.at(d1),dCoeffs.at(d1)); //add the contribution of this daughter-pair
 					}
 				}
-	cout << "After diagonal generation: " << endl << Ham << endl;
-
 			}
-
 		}
+//	cout << "Final Hamiltonian: " << endl << Ham << endl;
 	}
 //	cout << "At end: " << Ham << endl;
 	
-	/*printLongVector(Basis);
+	printLongVector(Basis);
 	for (int i=0; i<Basis.size(); i++)
 	{
 		cout << "Basis state " << Basis[i] << endl;
@@ -334,7 +351,7 @@ GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const double Sz
 		cout << "Daughters1" << endl;
 		gen_daughters(Basis[i],daughters1,d1Coeffs,K_sect);
 		printBoolArray(daughters1,d1Coeffs);
-	}*/
+	}
 
 	//testing section for hamiltonian element generator
 
@@ -723,8 +740,8 @@ int main()
 	J=prm.JJ_;
 	Q=-prm.QQ_;// SIGN HAS TO BE FLIPPED: NOW SIGN AT INPUT IS SAME AS PAPER 
 	Sz=prm.Sz_;
-	K_Sect[0]=0;//prm.K_SectX;
-	K_Sect[1]=1;//prm.K_SectY;
+	K_Sect[0]=1;//prm.K_SectX;
+	K_Sect[1]=0;//prm.K_SectY;
 
 	//slightly different implementation of dimensionality
 	//first parameter is now the length of each dimension, so, the square root of the total enumber of elements
