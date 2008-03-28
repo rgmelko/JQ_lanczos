@@ -276,9 +276,9 @@ GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const double Sz
 				Ham.resizeAndPreserve(Basis.size(),Basis.size());//grow the array by one in each direction
 	cout << "After resizing: " << endl << Ham << endl;
 				//off diagonal elements
-				for (int i=0; i<(Basis.size()-1); i++)// for all basis not including last
+/*				for (int i=0; i<(Basis.size()-1); i++)// for all basis not including last
 				{
-					Ham(i,BasisSize)=0; //set element to 0
+					//Ham(i,BasisSize)=0; //set element to 0
 					gen_daughters(Basis[i],daughters1,d1Coeffs,K_sect);//generate daughters of second state, since first state was generated in discovery process, and not yet cleared
 					for (int d1=0; d1<daughters.size(); d1++) //for all combinations of daughter and daughter1 members
 					{
@@ -287,30 +287,34 @@ GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const double Sz
 							cout << "States : " << endl;
 							printBoolVector(daughters1[d2]);
 							printBoolVector(daughters[d1]);
-							Ham(i,BasisSize)+=hamElementGenerator(daughters1[d2],d1Coeffs[d2],daughters[d1],dCoeffs[d1]);// add the contribution of this daughter-pair
+							Ham(i,BasisSize-1)+=hamElementGenerator(daughters1[d2],d1Coeffs[d2],daughters[d1],dCoeffs[d1]);// add the contribution of this daughter-pair
 							cout << "Should give hamElement: " << hamElementGenerator(daughters1[d2],d1Coeffs[d2],daughters[d1],dCoeffs[d1]) << " at " << i << "x" << Basis.size() << endl;
 						}
 					}
-					Ham(BasisSize,i)=Ham(i,BasisSize); //duplicate in lower half of matrix
+					Ham(BasisSize-1,i)=Ham(i,BasisSize-1); //duplicate in lower half of matrix
 	cout << "After off-diagonal generation: " << endl << Ham << endl;
-				}
+				}*/
 				//diagonal element - set aside since daughters already generated
 						int d2=0;
 						printBoolVector(daughters[d2]);
 						printBoolVector(daughters[0]);
 				cout << "Fine until here." << endl;
-				Ham(BasisSize,BasisSize)=0; //set element to 0
+				Ham(BasisSize-1,BasisSize-1)=0; //set element to 0
 				cout << "Made it to here?" << endl;
 				for (int d1=0; d1<daughters.size(); d1++) //for all combinations of daughter and daughter1 members
 				{
 					for (int d2=d1; d2<daughters.size(); d2++)
 					{
 						cout << "States : " << endl;
-						cout << "Attempting to access daughters element d2=" << d2 << " where the size of daughters is " << daughters.size() << endl;
-						printBoolVector(daughters[d2]);
-						printBoolVector(daughters[d1]);
-						cout << "Should give hamElement: " << hamElementGenerator(daughters[d2],d1Coeffs[d2],daughters[d1],dCoeffs[d1])<< " at " << state << "x" << state << endl;
-						Ham(BasisSize,BasisSize)+=hamElementGenerator(daughters[d2],d1Coeffs[d2],daughters[d1],dCoeffs[d1]); //add the contribution of this daughter-pair
+						cout << "d1= " << d1 << " daughters.size()= " << daughters.size() << endl;
+//						cout << "d2= " << d2 << " daughters.size()= " << daughters.size() << endl;
+//						cout << "d1Coeffs= " << d2 << " d1Coeffs.size()= " << d1Coeffsaughters.size() << endl;
+//						cout << "d2= " << d2 << " daughters.size()= " << daughters.size() << endl;
+
+						printBoolVector(daughters.at(d2));
+						printBoolVector(daughters.at(d1));
+						cout << "Should give hamElement: " << hamElementGenerator(daughters.at(d2),dCoeffs.at(d2),daughters.at(d1),dCoeffs.at(d1));//<< " at " << state << "x" << state << endl;
+						Ham(BasisSize-1,BasisSize-1)+=hamElementGenerator(daughters.at(d2),dCoeffs.at(d2),daughters.at(d1),dCoeffs.at(d1)); //add the contribution of this daughter-pair
 					}
 				}
 	cout << "After diagonal generation: " << endl << Ham << endl;
