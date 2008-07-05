@@ -1,8 +1,8 @@
 #include "GenHam.h"
 
 //----------------------------------------------------------
-GENHAM::GENHAM(const int Ns, const h_float J_, const h_float Q_, const int Sz)  
-               : JJ(J_), QQ(Q_) 
+GENHAM::GENHAM(const int Ns, const h_float J_, const h_float J2_, const h_float Q_, const int Sz)  
+               : JJ(J_), J2(J2_), QQ(Q_) 
 //create bases and determine dim of full Hilbert space
 {
   int Dim;
@@ -99,6 +99,30 @@ void GENHAM::FullHamJQ(){
       revPos = revBas.at(tempod);
       if (revPos != -1){
         tempD = (*this).HOFFdBondY(T0,tempi);
+        Ham(ii,revPos) = tempD;
+      }
+
+      //Next-nearest neighbor bonds: J2
+        //bond 0,2
+      si = PlaqX(T0,0);
+      tempod = tempi;
+      sj = PlaqX(T0,2); //sj = Bond(T0,1);
+      tempod ^= (1<<si);   //toggle bit 
+      tempod ^= (1<<sj);   //toggle bit 
+      revPos = revBas.at(tempod);
+      if (revPos != -1){
+        tempD = (*this).HOFFdBond_02(T0,tempi);
+        Ham(ii,revPos) = tempD;
+      }
+        //bond 1,3
+      si = PlaqX(T0,1);
+      tempod = tempi;
+      sj = PlaqX(T0,3); //sj = Bond(T0,1);
+      tempod ^= (1<<si);   //toggle bit 
+      tempod ^= (1<<sj);   //toggle bit 
+      revPos = revBas.at(tempod);
+      if (revPos != -1){
+        tempD = (*this).HOFFdBond_13(T0,tempi);
         Ham(ii,revPos) = tempD;
       }
 
@@ -244,6 +268,20 @@ double GENHAM::HdiagPart(const long bra){
     S1b = (bra>>T1)&1;  //unpack bra
     valH += JJ*(S0b-0.5)*(S1b-0.5);
 
+    //Next-Nearest Neighbor part
+     //bond 0,2 
+    T0 = PlaqX(Ti,0); 
+    S0b = (bra>>T0)&1;
+    T1 = PlaqX(Ti,2);
+    S1b = (bra>>T1)&1; 
+    valH += J2*(S0b-0.5)*(S1b-0.5);
+     //bond 1,3
+    T0 = PlaqX(Ti,1); 
+    S0b = (bra>>T0)&1;
+    T1 = PlaqX(Ti,3);
+    S1b = (bra>>T1)&1;
+    valH += J2*(S0b-0.5)*(S1b-0.5);
+
     //X Plaquettes
     P0 = PlaqX(Ti,0);  //if (P0 != Ti) cout<<"ERROR \n";
     s0p = (bra>>P0)&1;
@@ -319,6 +357,28 @@ double GENHAM::HOFFdBondY(const int si, const long bra){
   S0 = (bra>>T0)&1;    //spin values base 0
   S1 = (bra>>T1)&1;
   valH += QQ*0.5*( (S0-0.5)*(S1-0.5) - 0.25);
+
+  return valH;
+
+}//HOFFdPart
+
+//----------------------------------------------------------
+double GENHAM::HOFFdBond_02(const int si, const long bra){
+
+  double valH;
+
+  valH = J2*0.5; //contribution from the J2 part of the Hamiltonian
+
+  return valH;
+
+}//HOFFdPart
+
+//----------------------------------------------------------
+double GENHAM::HOFFdBond_13(const int si, const long bra){
+
+  double valH;
+
+  valH = J2*0.5; //contribution from the J2 part of the Hamiltonian
 
   return valH;
 

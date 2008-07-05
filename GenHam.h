@@ -33,7 +33,7 @@ class GENHAM{
     
     Array<double,2> Ham;  //full hamiltonian
 
-    GENHAM(const int,const h_float J_, const h_float Q_,const int Sz); 
+    GENHAM(const int,const h_float J_, const h_float J2_,const h_float Q_,const int Sz); 
     void printg();
     //double at(const int , const int );
     Array<double,1> apply(const Array<double,1>&);
@@ -52,11 +52,14 @@ class GENHAM{
     int Nsite;
 
     h_float JJ; //heisenberg exchange value
+    h_float J2; //next-nearest neighbor exchange value
     h_float QQ; //ring-exchange value
 
     double HdiagPart(const long);
     double HOFFdBondX(const int, const long);
     double HOFFdBondY(const int, const long);
+    double HOFFdBond_02(const int, const long);
+    double HOFFdBond_13(const int, const long);
     double HOFFdPlaq(const int, const long);
 
 };
