@@ -1,4 +1,4 @@
-OBJS = ED_Lan_1107.o GenHam.o  Lanczos_07.o lapack.o Lattice_24R.cpp
+OBJS = ED_Lan_1107.o GenHam.o  Lanczos_07.o lapack.o Lattice_16B.cpp
 CC = g++
 #CFLAGS = -O2 
 CFLAGS = -O2 -arch x86_64
@@ -14,8 +14,8 @@ ED_Lan_1107.o: ED_Lan_1107.cpp GenHam.h Lanczos_07.h lapack.h simparam.h
 GenHam.o: GenHam.cpp GenHam.h Lanczos_07.h
 	$(CC) $(CFLAGS) -c GenHam.cpp
 
-Lattice_24R.o: Lattice_24R.cpp GenHam.h 
-	$(CC) $(CFLAGS) -c Lattice_24R.cpp
+Lattice_16B.o: Lattice_16B.cpp GenHam.h 
+	$(CC) $(CFLAGS) -c Lattice_16B.cpp
 
 Lanczos_07.o: Lanczos_07.cpp GenHam.h Lanczos_07.h
 	$(CC) $(CFLAGS) -c Lanczos_07.cpp

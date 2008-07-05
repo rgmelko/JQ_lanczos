@@ -38,8 +38,8 @@ int main(){
   Q=-prm.QQ_;// SIGN HAS TO BE FLIPPED: NOW SIGN AT INPUT IS SAME AS PAPER 
   Sz=prm.Sz_;
 
-  GENHAM HV(24,J,Q,Sz); 
-  HV.Bonds_24R(); 
+  GENHAM HV(16,J,Q,Sz); 
+  HV.Bonds_16B(); 
 
   LANCZOS lancz(HV.Vdim);  //dimension of reduced Hilbert space (Sz sector)
 

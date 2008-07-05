@@ -6,7 +6,7 @@ LANCZOS::LANCZOS(const int Dim_) : Dim (Dim_)
 {
   //Dim = Dim_;
 
-  STARTIT = 20;
+  STARTIT = 3;
   CONV_PREC = 1E-7;
 
   Psi.resize(Dim_);
@@ -147,7 +147,7 @@ void LANCZOS::Diag(const GENHAM& SparseH, const int Neigen, const int Evects2)
     for (int o=0; o<Ord.size(); o++)  cout<<setprecision(12)<<Ord.at(o)<<"  ";     
     cout<<endl;
 
-	if ( (E0 - Ord.back() ) < CONV_PREC) {
+	if ( (E0 - Ord.back() ) < CONV_PREC  && iter > 12) {
 	  Lexit = 1;
 	  //cout<<"Lanc :"<<iter<<" ";
 	  //cout<<setprecision(12)<<d(min)<<"\n";     
