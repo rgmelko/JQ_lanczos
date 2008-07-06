@@ -2,6 +2,7 @@
 Exact Diagonalization program (Lanczos and Complete)
 for AWS' J-Q model
 Roger Melko, November 2007
+J2 added for Complete Diagonalization only
 ********************************************************************/
 
 
