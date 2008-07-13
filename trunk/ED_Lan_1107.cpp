@@ -46,31 +46,27 @@ int main(){
 
   LANCZOS lancz(HV.Vdim);  //dimension of reduced Hilbert space (Sz sector)
 
-//  HV.SparseHamJQ();  //generates sparse matrix Hamiltonian for Lanczos
+  HV.SparseHamJQ();  //generates sparse matrix Hamiltonian for Lanczos
 //  HV.printg();
-//  lancz.Diag(HV,prm.Neigen_,prm.valvec_); // second parameter: # of eigenvalues to converge
+  lancz.Diag(HV,prm.Neigen_,prm.valvec_); // second parameter: # of eigenvalues to converge
                       // third parameter: 1 for -values only, 2 for vals AND vectors
 
-  HV.FullHamJQ();  //generates full Sz sector Hamiltonian
+//  HV.FullHamJQ();  //generates full Sz sector Hamiltonian
 
-//  OLD CODE DON'T USE//  Array<double,1> dd(HV.Vdim);         //************
-//  OLD CODE DON'T USE//  Array<double,1> ee(HV.Vdim);         //  RGM HOUSEHOLDER
-//  OLD CODE DON'T USE//  H.tred3(HV.Ham, dd, ee, HV.Vdim);    //************
-
-  cout<<"Done making the Hamiltonian \n";
-  cout.flush();
-  vector<double> dd;
-  diagWithLapack_R(HV.Ham,dd);  //*** LAPACK DIAG
-  cout<<"Done diagonalizting the Hamiltonian \n";
-  cout.flush();
-
-  double min=999.0;
-  for (int ii=0; ii<dd.size(); ii++) {
-    cout<<setprecision(12)<<dd.at(ii)<<"\n";     
-    if (dd.at(ii)<min) min=dd.at(ii);
-  }
-  cout<<endl;
-  cout<<"HH energy: "<<min<<endl;
+//  cout<<"Done making the Hamiltonian \n";
+//  cout.flush();
+//  vector<double> dd;
+//  diagWithLapack_R(HV.Ham,dd);  //*** LAPACK DIAG
+//  cout<<"Done diagonalizting the Hamiltonian \n";
+//  cout.flush();
+//
+//  double min=999.0;
+//  for (int ii=0; ii<dd.size(); ii++) {
+//    cout<<setprecision(12)<<dd.at(ii)<<"\n";     
+//    if (dd.at(ii)<min) min=dd.at(ii);
+//  }
+//  cout<<endl;
+//  cout<<"HH energy: "<<min<<endl;
 
   return 0;
 

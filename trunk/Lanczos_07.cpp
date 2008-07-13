@@ -6,8 +6,8 @@ LANCZOS::LANCZOS(const int Dim_) : Dim (Dim_)
 {
   //Dim = Dim_;
 
-  STARTIT = 3;
-  CONV_PREC = 1E-7;
+  STARTIT = 5;
+  CONV_PREC = 1E-12;
 
   Psi.resize(Dim_);
   V0.resize(Dim_); 

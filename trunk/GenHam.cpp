@@ -200,6 +200,31 @@ void GENHAM::SparseHamJQ()
         tempH.push_back(tempD); 
       }
 
+      //Next-nearest neighbor bonds: J2
+        //bond 0,2
+      si = PlaqX(T0,0);
+      tempod = tempi;
+      sj = PlaqX(T0,2); //sj = Bond(T0,1);
+      tempod ^= (1<<si);   //toggle bit 
+      tempod ^= (1<<sj);   //toggle bit 
+      if (BasPos.at(tempod) != -1 && BasPos.at(tempod) > ii){ 
+        tempBas.push_back(BasPos.at(tempod));
+        tempD = (*this).HOFFdBond_02(T0,tempi);
+        tempH.push_back(tempD); 
+
+      }
+        //bond 1,3
+      si = PlaqX(T0,1);
+      tempod = tempi;
+      sj = PlaqX(T0,3); //sj = Bond(T0,1);
+      tempod ^= (1<<si);   //toggle bit 
+      tempod ^= (1<<sj);   //toggle bit 
+      if (BasPos.at(tempod) != -1 && BasPos.at(tempod) > ii){ 
+        tempBas.push_back(BasPos.at(tempod));
+        tempD = (*this).HOFFdBond_13(T0,tempi);
+        tempH.push_back(tempD); 
+      }
+
        //-----4:   plaquette 
       tempod = tempi;
       si = PlaqX(T0,0);   //not always redundant here
