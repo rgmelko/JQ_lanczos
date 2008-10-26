@@ -31,24 +31,24 @@ int main(){
 //  cout<<sizeof(float)<<endl;
 
   PARAMS prm;
-  double J;
-  double J2;
-  double Q;
+  double J;  //bonds a
+  double J2; //bonds b
+//  double Q;
   int Sz;
   
   J=prm.JJ_;
   J2=prm.J2_;
-  Q=-prm.QQ_;// SIGN HAS TO BE FLIPPED: NOW SIGN AT INPUT IS SAME AS PAPER 
+//  Q=-prm.QQ_;// SIGN HAS TO BE FLIPPED: NOW SIGN AT INPUT IS SAME AS PAPER 
   Sz=prm.Sz_;
 
-  GENHAM HV(16,J,J2,Q,Sz); 
-  HV.Bonds_16B(); 
+  GENHAM HV(8,J,J2,Sz); 
+  HV.Bonds_8(); 
 
-  LANCZOS lancz(HV.Vdim);  //dimension of reduced Hilbert space (Sz sector)
+//  LANCZOS lancz(HV.Vdim);  //dimension of reduced Hilbert space (Sz sector)
 
-  HV.SparseHamJQ();  //generates sparse matrix Hamiltonian for Lanczos
+//  HV.SparseHamJQ();  //generates sparse matrix Hamiltonian for Lanczos
 //  HV.printg();
-  lancz.Diag(HV,prm.Neigen_,prm.valvec_); // second parameter: # of eigenvalues to converge
+//  lancz.Diag(HV,prm.Neigen_,prm.valvec_); // second parameter: # of eigenvalues to converge
                       // third parameter: 1 for -values only, 2 for vals AND vectors
 
 //  HV.FullHamJQ();  //generates full Sz sector Hamiltonian
