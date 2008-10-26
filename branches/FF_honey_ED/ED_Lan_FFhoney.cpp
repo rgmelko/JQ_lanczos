@@ -42,7 +42,7 @@ int main(){
   Sz=prm.Sz_;
 
   GENHAM HV(8,J,J2,Sz); 
-  HV.Bonds_8(); 
+//  HV.Bonds_8(); 
 
 //  LANCZOS lancz(HV.Vdim);  //dimension of reduced Hilbert space (Sz sector)
 

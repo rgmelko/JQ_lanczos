@@ -26,16 +26,11 @@ class GENHAM{
     vector<long> BasPos;
 
     Array<int,2> Bond;
-    Array<int,2> OtherTwoX; //sites on the plaquette that are not in bond
-    Array<int,2> OtherTwoY;
-    Array<int,2> PlaqX;
-    Array<int,2> PlaqY;
     
     Array<double,2> Ham;  //full hamiltonian
 
-    GENHAM(const int,const h_float J_, const h_float J2_,const h_float Q_,const int Sz); 
-    void printg();
-    //double at(const int , const int );
+    GENHAM(const int,const h_float J_, const h_float J2_,const int Sz); 
+    
     Array<double,1> apply(const Array<double,1>&);
 
     void Bonds_8();
@@ -46,16 +41,13 @@ class GENHAM{
     int Nsite;
 
     h_float JJ; //heisenberg exchange value
-    h_float J2; //next-nearest neighbor exchange value
-//    h_float QQ; //ring-exchange value
+    h_float J2; //exchange value for bond b
 
     double HdiagPart(const long);
-    double HOFFdBondX(const int, const long);
-    double HOFFdBondY(const int, const long);
-    double HOFFdBond_02(const int, const long);
-    double HOFFdBond_13(const int, const long);
-    double HOFFdPlaq(const int, const long);
+    double HOFFdBond0(const int, const long);
+    double HOFFdBond1(const int, const long);
+    double HOFFdBond2(const int, const long);
 
 };
 
-#endif
+iendif
