@@ -38,13 +38,7 @@ class GENHAM{
     //double at(const int , const int );
     Array<double,1> apply(const Array<double,1>&);
 
-    void Bonds_16A();
-    void Bonds_16B();
-    void Bonds_18A();
-    void Bonds_20A();
-    void Bonds_24A();
-    void Bonds_24R();
-    void Bonds_26A();
+    void Bonds_8();
     void SparseHamJQ();
     void FullHamJQ();
 
@@ -53,7 +47,7 @@ class GENHAM{
 
     h_float JJ; //heisenberg exchange value
     h_float J2; //next-nearest neighbor exchange value
-    h_float QQ; //ring-exchange value
+//    h_float QQ; //ring-exchange value
 
     double HdiagPart(const long);
     double HOFFdBondX(const int, const long);
