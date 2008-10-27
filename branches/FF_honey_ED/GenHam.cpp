@@ -58,34 +58,34 @@ void GENHAM::FullHamJQ(){
     tempD = (*this).HdiagPart(tempi);
     Ham(ii,ii) = tempD;
 
-    for (int T0=0; T0<Nsite; T0++){ // Now generate off-diagonal part
-
-      //si = PlaqX(T0,0); //si = Bond(T0,0);
-      //if (si != T0) cout<<"Square error \n";
-      // X Bond
-      tempod = tempi;
-      //sj = PlaqX(T0,1); //sj = Bond(T0,1);
-      tempod ^= (1<<si);   //toggle bit 
-      tempod ^= (1<<sj);   //toggle bit 
-      revPos = revBas.at(tempod);
-      if (revPos != -1){
-        tempD = (*this).HOFFdBond0(T0,tempi);
-        Ham(ii,revPos) = tempD;
-      }
-
-      // Y Bond
-      tempod = tempi;
-      //sj = PlaqX(T0,3); //sj = Bond(T0,2);
-      tempod ^= (1<<si);   //toggle bit 
-      tempod ^= (1<<sj);   //toggle bit 
-      revPos = revBas.at(tempod);
-      if (revPos != -1){
-        tempD = (*this).HOFFdBond1(T0,tempi);
-        Ham(ii,revPos) = tempD;
-      }
-
-
-    }//si
+//    for (int T0=0; T0<Nsite; T0++){ // Now generate off-diagonal part
+//
+//      //si = PlaqX(T0,0); //si = Bond(T0,0);
+//      //if (si != T0) cout<<"Square error \n";
+//      // X Bond
+//      tempod = tempi;
+//      //sj = PlaqX(T0,1); //sj = Bond(T0,1);
+//      tempod ^= (1<<si);   //toggle bit 
+//      tempod ^= (1<<sj);   //toggle bit 
+//      revPos = revBas.at(tempod);
+//      if (revPos != -1){
+//        tempD = (*this).HOFFdBond0(T0,tempi);
+//        Ham(ii,revPos) = tempD;
+//      }
+//
+//      // Y Bond
+//      tempod = tempi;
+//      //sj = PlaqX(T0,3); //sj = Bond(T0,2);
+//      tempod ^= (1<<si);   //toggle bit 
+//      tempod ^= (1<<sj);   //toggle bit 
+//      revPos = revBas.at(tempod);
+//      if (revPos != -1){
+//        tempD = (*this).HOFFdBond1(T0,tempi);
+//        Ham(ii,revPos) = tempD;
+//      }
+//
+//
+//    }//si
 
   }//ii
 
