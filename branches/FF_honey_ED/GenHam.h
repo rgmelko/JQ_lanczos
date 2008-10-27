@@ -30,11 +30,13 @@ class GENHAM{
     Array<double,2> Ham;  //full hamiltonian
 
     GENHAM(const int,const h_float J_, const int Sz); 
-    
+    void printg();
     Array<double,1> apply(const Array<double,1>&);
+  
 
     void Bonds_8();
-    void SparseHamJQ();
+
+    void SparseHam();
     void FullHamJQ();
 
   private:

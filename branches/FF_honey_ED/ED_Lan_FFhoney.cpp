@@ -4,6 +4,7 @@ for the fully frustrated honeycomb XXZ model
 Roger Melko, October 2008
 ********************************************************************/
 
+#define DO_LANCZOS //Lanczos or LAPACK full ED
 
 #include <fstream> 
 #include <vector> 
@@ -39,12 +40,16 @@ int main(){
   GENHAM HV(8,J,Sz); 
   HV.Bonds_8(); 
 
-//  LANCZOS lancz(HV.Vdim);  //dimension of reduced Hilbert space (Sz sector)
+#ifdef DO_LANCZOS    //EVERYTHING IN THIS BLOCK OF CODE FOR LANCZOS
 
-//  HV.SparseHamJQ();  //generates sparse matrix Hamiltonian for Lanczos
-//  HV.printg();
-//  lancz.Diag(HV,prm.Neigen_,prm.valvec_); // second parameter: # of eigenvalues to converge
+  LANCZOS lancz(HV.Vdim);  //dimension of reduced Hilbert space (Sz sector)
+
+  HV.SparseHam();  //generates sparse matrix Hamiltonian for Lanczos
+  //HV.printg();
+  lancz.Diag(HV,prm.Neigen_,prm.valvec_); // second parameter: # of eigenvalues to converge
                       // third parameter: 1 for -values only, 2 for vals AND vectors
+
+#else             //EVERTHING IN THIS BLOCK OF CODE FOR FULL LAPACK ED
 
   HV.FullHamJQ();  //generates full Sz sector Hamiltonian
 
@@ -62,6 +67,8 @@ int main(){
   }
   cout<<endl;
   cout<<"HH energy: "<<min<<endl;
+
+#endif
 
   return 0;
 
