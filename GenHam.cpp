@@ -65,13 +65,15 @@ void GENHAM::FullHamJQ(){
       // 1st Bond
       tempod = tempi;
       sj = Bond(T0,1);
-      tempod ^= (1<<si);   //toggle bit 
-      tempod ^= (1<<sj);   //toggle bit 
-      revPos = revBas.at(tempod);
-      if (revPos != -1){
-        //tempD = (*this).HOFFdBond0(T0,tempi);
-        tempD = -0.5; //FM in plane exchange
-        Ham(ii,revPos) = tempD;
+      if (sj != -99) {  //if the second bond exists
+        tempod ^= (1<<si);   //toggle bit 
+        tempod ^= (1<<sj);   //toggle bit 
+        revPos = revBas.at(tempod);
+        if (revPos != -1){
+          //tempD = (*this).HOFFdBond0(T0,tempi);
+          tempD = -0.5; //FM in plane exchange
+          Ham(ii,revPos) = tempD;
+        }
       }
 
       // 2nd Bond
@@ -110,9 +112,13 @@ double GENHAM::HdiagPart(const long bra){
     T0 = Bond(Ti,0); //lower left spin
     S0b = (bra>>T0)&1;  
     if (T0 != Ti) cout<<"Square error 3\n";
+
     T1 = Bond(Ti,1); //first bond
-    S1b = (bra>>T1)&1;  //unpack bra
-    valH += JJ*(S0b-0.5)*(S1b-0.5);
+    if (T1 != -99) { //if there exists a 2nd bond
+      S1b = (bra>>T1)&1;  //unpack bra
+      valH += JJ*(S0b-0.5)*(S1b-0.5);
+    } 
+
     T1 = Bond(Ti,2); //second bond
     if (T1 != -99) { //if there exists a 2nd bond
       S1b = (bra>>T1)&1;  //unpack bra
@@ -163,13 +169,15 @@ void GENHAM::SparseHam()
       //-----2:   first bond (Horizontal)
       tempod = tempi;
       sj = Bond(T0,1);
-      tempod ^= (1<<si);   //toggle bit 
-      tempod ^= (1<<sj);   //toggle bit 
-      if (BasPos.at(tempod) != -1 && BasPos.at(tempod) > ii){ //build only upper half of matrix
-        tempBas.push_back(BasPos.at(tempod));
-        //tempD = (*this).HOFFdBondX(T0,tempi);
-        tempD = -0.5; //FM in plane exchange
-        tempH.push_back(tempD); 
+      if (sj != -99) {  //if the second bond exists
+        tempod ^= (1<<si);   //toggle bit 
+        tempod ^= (1<<sj);   //toggle bit 
+        if (BasPos.at(tempod) != -1 && BasPos.at(tempod) > ii){ //build only upper half of matrix
+          tempBas.push_back(BasPos.at(tempod));
+          //tempD = (*this).HOFFdBondX(T0,tempi);
+          tempD = -0.5; //FM in plane exchange
+          tempH.push_back(tempD); 
+        }
       }
 
       // 2nd Bond
