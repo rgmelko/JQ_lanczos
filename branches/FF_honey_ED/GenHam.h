@@ -35,7 +35,7 @@ class GENHAM{
   
 
     void Bonds_8();
-    void Bonds_18o();
+    void Bonds_18p();
 
     void SparseHam();
     void FullHamJQ();

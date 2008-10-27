@@ -1,8 +1,8 @@
 #include "GenHam.h"
 
-// Square (4x4) conventional 16 site lattice
+// 3x3x2 lattice with periodic boundary conditions
 //----------------------------------------------------------
-void GENHAM::Bonds_18o(){
+void GENHAM::Bonds_18p(){
 
   Bond.resize(Nsite,4);
   //each site has either 1 or two bonds
