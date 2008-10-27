@@ -18,9 +18,9 @@ void GENHAM::Bonds_8(){
          2, 3, -99,  0,
          3, 4, 6,    0,
          4, 5, -99,  0,
-         5, 2, 0,    1,
+         5, 2, 0,    1, //FM
          6, 7, -99,  0,
-         7, 0, 2,    1;
+         7, 0, 2,    1; //FM
 
 //the LAST entry of 1 indicates that the NONZERO 2nd bond is FM
 
