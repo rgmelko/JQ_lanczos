@@ -1,6 +1,6 @@
 OBJS = ED_Lan_FFhoney.o GenHam.o  Lanczos_07.o lapack.o Lattice_8.cpp
 CC = g++
-#CFLAGS = -O2 
+#CFLAGS = -g
 CFLAGS = -O2 -arch x86_64
 #LIBS = -lm -framework veclib
 LIBS = -framework Accelerate
