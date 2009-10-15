@@ -45,6 +45,7 @@ class GENHAM{
     void Bonds_24A();
     void Bonds_24R();
     void Bonds_26A();
+    void Bonds_30R();
     void SparseHamJQ();
     void FullHamJQ();
 
