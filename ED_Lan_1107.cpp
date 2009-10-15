@@ -42,8 +42,8 @@ int main(){
   Q=-prm.QQ_;// SIGN HAS TO BE FLIPPED: NOW SIGN AT INPUT IS SAME AS PAPER 
   Sz=prm.Sz_;
 
-  GENHAM HV(30,J,J2,Q,Sz); 
-  HV.Bonds_30R(); 
+  GENHAM HV(16,J,J2,Q,Sz); 
+  HV.Bonds_16B(); 
 
 #ifdef DO_LANCZOS    
   //-------------------------EVERYTHING IN THIS BLOCK OF CODE FOR LANCZOS
