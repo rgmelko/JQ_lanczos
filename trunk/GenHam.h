@@ -50,7 +50,9 @@ class GENHAM{
     void FullHamJQ();
 
   private:
-    int Nsite;
+    int Nsite; //number sites
+    unsigned long SpinInv; //SpinInv integer = 0 for no spin inversion symmetry
+
 
     h_float JJ; //heisenberg exchange value
     h_float J2; //next-nearest neighbor exchange value
