@@ -195,7 +195,7 @@ void GENHAM::SparseHamJQ()
       tempod ^= (1<<si);   //toggle bit 
       tempod ^= (1<<sj);   //toggle bit 
       //spin inversion symmmetry ---
-      if (si == (Nsite-1) || sj == (Nsite-1 ) ) {
+      if ( ( SpinInv !=0) && (si == (Nsite-1) || sj == (Nsite-1 ) ) ) {
           tempod = ~tempod;
           tempod -= SpinInv;
       } //--------------------------
@@ -211,7 +211,7 @@ void GENHAM::SparseHamJQ()
       tempod ^= (1<<si);   //toggle bit 
       tempod ^= (1<<sj);   //toggle bit 
       //spin inversion symmmetry ---
-      if (si == (Nsite-1) || sj == (Nsite-1 ) ) {
+      if ( ( SpinInv !=0) && (si == (Nsite-1) || sj == (Nsite-1 ) ) ) {
           tempod = ~tempod;
           tempod -= SpinInv;
       } //--------------------------
@@ -229,7 +229,7 @@ void GENHAM::SparseHamJQ()
       tempod ^= (1<<si);   //toggle bit 
       tempod ^= (1<<sj);   //toggle bit 
       //spin inversion symmmetry ---
-      if (si == (Nsite-1) || sj == (Nsite-1 ) ) {
+      if ( ( SpinInv !=0) && (si == (Nsite-1) || sj == (Nsite-1 ) ) ) {
           tempod = ~tempod;
           tempod -= SpinInv;
       } //--------------------------
@@ -246,7 +246,7 @@ void GENHAM::SparseHamJQ()
       tempod ^= (1<<si);   //toggle bit 
       tempod ^= (1<<sj);   //toggle bit 
       //spin inversion symmmetry ---
-      if (si == (Nsite-1) || sj == (Nsite-1 ) ) {
+      if ( ( SpinInv !=0) && (si == (Nsite-1) || sj == (Nsite-1 ) ) ) {
           tempod = ~tempod;
           tempod -= SpinInv;
       } //--------------------------
@@ -267,8 +267,8 @@ void GENHAM::SparseHamJQ()
       tempod ^= (1<<sk);   
       tempod ^= (1<<sl);   
       //spin inversion symmetry ----
-      if (si == (Nsite-1) || sj == (Nsite-1 ) ||
-          sk == (Nsite-1) || sl == (Nsite-1 ) ) {
+      if ( ( SpinInv !=0) && (si == (Nsite-1) || sj == (Nsite-1 ) ||
+          sk == (Nsite-1) || sl == (Nsite-1 ) ) ) {
           tempod = ~tempod;
           tempod -= SpinInv;
       } //--------------------------
