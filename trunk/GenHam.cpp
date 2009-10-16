@@ -1,4 +1,5 @@
 #include "GenHam.h"
+//#define SPIN_INV 
 
 //----------------------------------------------------------
 GENHAM::GENHAM(const int Ns, const h_float J_, const h_float J2_, const h_float Q_, const int Sz)  
@@ -20,11 +21,13 @@ GENHAM::GENHAM(const int Ns, const h_float J_, const h_float J2_, const h_float 
   //for spin iversion symmetry
   //-------------------------
   SpinInv = 0; //default: comment below to shut off
+#ifdef SPIN_INV
   if (Sz == 0) {//set Spin Inversion symmetry on
       SpinInv = ~ (Dim-1); //This sets this integer to the complement of the 0 bits
       //cout<<SpinInv<<endl;
   }
   if (SpinInv != 0) Dim /= 2; //use only first half of Hilbert space
+#endif
   //-------------------------
 
   for (unsigned long i1=0; i1<Dim; i1++) 
