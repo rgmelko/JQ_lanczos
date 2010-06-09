@@ -5,7 +5,7 @@ Roger Melko, November 2007
 J2 added for Complete Diagonalization only
 ********************************************************************/
 
-#define DO_LANCZOS //Lanczos or LAPACK full ED
+//#define DO_LANCZOS //Lanczos or LAPACK full ED
 
 #include <fstream> 
 #include <vector> 
