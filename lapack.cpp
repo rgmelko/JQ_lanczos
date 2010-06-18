@@ -166,7 +166,7 @@ vector<double>& EigenVals)
       // Output 
       //
       
-      ofstream fout("values.dat");
+      ofstream fout("full_values.dat");
       
       for(int i=0; i<n; i++){ 
 	EigenVals.push_back(w[i]);
@@ -174,7 +174,7 @@ vector<double>& EigenVals)
       }
       fout.close();
 
-      ofstream fout2("vectors.dat");
+      ofstream fout2("full_vectors.dat");
       
       for(int i=0; i<n; i++){
 	for(int j=0; j<n; j++){
