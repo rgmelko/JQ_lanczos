@@ -25,6 +25,8 @@
 ///-----------------------------------------------------------------
 ///
 #include"lapack.h"
+#include<fstream>
+using namespace std;
 /*****************************************************************************/
 ///
 /// Function to take a complex my_Matrix and diag it
@@ -163,7 +165,26 @@ vector<double>& EigenVals)
       // 
       // Output 
       //
-      for(int i=0; i<n; i++) EigenVals.push_back(w[i]);
+      
+      ofstream fout("values.dat");
+      
+      for(int i=0; i<n; i++){ 
+	EigenVals.push_back(w[i]);
+	fout << setprecision(12) << w[i] << endl;
+      }
+      fout.close();
+
+      ofstream fout2("vectors.dat");
+      
+      for(int i=0; i<n; i++){
+	for(int j=0; j<n; j++){
+	  fout2 << setprecision(12) <<setw(20) << DMpart(i,j);
+	}
+	fout2 << endl;
+      }
+
+      fout2.close();
+      
       // 
       // Output 
       //
