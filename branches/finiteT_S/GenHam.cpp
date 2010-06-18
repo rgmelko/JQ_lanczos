@@ -35,7 +35,7 @@ GENHAM::GENHAM(const int Ns, const h_float J_, const h_float J2_, const h_float 
       temp = 0;
       for (int sp =0; sp<Nsite; sp++)
           temp += (i1>>sp)&1;  //unpack bra
-      // if (temp==(Nsite/2+Sz) ){ 
+      // if (temp==(Nsite/2+Sz) ){
           Basis.push_back(i1);
           BasPos.at(i1)=Basis.size()-1;
           Vdim++;
@@ -83,13 +83,14 @@ void GENHAM::FullHamJQ(){
   unsigned long tempi, tempj, tempod;
   double tempD;
   int si,sj,sk,sl, revPos;
-  for (ii=0; ii<Basis.size(); ii++){
-    tempi = Basis.at(ii);
 
+  for (ii=0; ii<Basis.size(); ii++){
+  
+    tempi = Basis.at(ii);
+   
     //Hamiltonian for diagonal
     tempD = (*this).HdiagPart(tempi);
     Ham(ii,ii) = tempD;
-
     for (int T0=0; T0<Nsite; T0++){ // Now generate off-diagonal part
 
       si = PlaqX(T0,0); //si = Bond(T0,0);
