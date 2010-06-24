@@ -2,8 +2,8 @@
 //#define SPIN_INV 
 
 //----------------------------------------------------------
-GENHAM::GENHAM(const int Ns, const h_float J_, const h_float J2_, const h_float Q_, const int Sz)  
-               : JJ(J_), J2(J2_), QQ(Q_) 
+GENHAM::GENHAM(const int Ns, const h_float Delta_ , const h_float J_, const h_float J2_, const h_float Q_, const int Sz)  
+               : Delta(Delta_), JJ(J_), J2(J2_), QQ(Q_) 
 //create bases and determine dim of full Hilbert space
 {
   int Dim;
@@ -32,14 +32,14 @@ GENHAM::GENHAM(const int Ns, const h_float J_, const h_float J2_, const h_float 
 
   for (unsigned long i1=0; i1<Dim; i1++) 
   {
-      temp = 0;
-      for (int sp =0; sp<Nsite; sp++)
-          temp += (i1>>sp)&1;  //unpack bra
-      // if (temp==(Nsite/2+Sz) ){
-          Basis.push_back(i1);
-          BasPos.at(i1)=Basis.size()-1;
-          Vdim++;
-	  //  }
+	  temp = 0;
+	  for (int sp =0; sp<Nsite; sp++)
+		  temp += (i1>>sp)&1;  //unpack bra
+	  if ( temp==(Nsite/2 + Sz) ){
+		  Basis.push_back(i1);
+		  BasPos.at(i1)=Basis.size()-1;
+		  Vdim++;
+	  }
   }//Dim
 
   cout<<"Vdim "<<Vdim<<" "<<Dim<<endl;
@@ -329,10 +329,10 @@ double GENHAM::HdiagPart(const long bra){
     //if (T0 != Ti) cout<<"Square error 3\n";
     T1 = PlaqX(Ti,1); //T1 = Bond(Ti,1); //first bond
     S1b = (bra>>T1)&1;  //unpack bra
-    valH += JJ*(S0b-0.5)*(S1b-0.5);
+    valH += Delta*(S0b-0.5)*(S1b-0.5);
     T1 = PlaqX(Ti,3); //T1 = Bond(Ti,2); //second bond
     S1b = (bra>>T1)&1;  //unpack bra
-    valH += JJ*(S0b-0.5)*(S1b-0.5);
+    valH += Delta*(S0b-0.5)*(S1b-0.5);
 
     //Next-Nearest Neighbor part
      //bond 0,2 

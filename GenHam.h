@@ -33,7 +33,7 @@ class GENHAM{
     
     Array<double,2> Ham;  //full hamiltonian
 
-    GENHAM(const int,const h_float J_, const h_float J2_,const h_float Q_,const int Sz); 
+    GENHAM(const int,const h_float Delta_, const h_float J_, const h_float J2_,const h_float Q_,const int Sz); 
     void printg();
     //double at(const int , const int );
     Array<double,1> apply(const Array<double,1>&);
@@ -55,7 +55,8 @@ class GENHAM{
     unsigned long SpinInv; //SpinInv integer = 0 for no spin inversion symmetry
 
 
-    h_float JJ; //heisenberg exchange value
+    h_float Delta; //heisenberg exchange value
+    h_float JJ; //XY exchange value
     h_float J2; //next-nearest neighbor exchange value
     h_float QQ; //ring-exchange value
 
