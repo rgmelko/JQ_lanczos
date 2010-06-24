@@ -8,7 +8,8 @@
 class PARAMS
 {
   public:
-    double JJ_; //the heisenberg exchange
+    double Delta_; //the heisenberg exchange
+    double JJ_; //the off-diagonal exchange
     double J2_; //the next-nearest neighbor heisenberg exchange
     double QQ_; //the 4-particle SU(2) exchange
     int Sz_; // z-component of total spin
@@ -22,6 +23,7 @@ class PARAMS
       ifstream pfin;
       pfin.open("param.dat");
     
+      pfin >> Delta_;
       pfin >> JJ_;
       pfin >> J2_;
       pfin >> QQ_;

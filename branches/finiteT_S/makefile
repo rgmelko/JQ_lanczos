@@ -2,7 +2,7 @@ OBJS = ED_Ann_0610.o GenHam.o  Lanczos_07.o lapack.o Lattice_16B.cpp
 CC = g++
 #CC = icc
 #CFLAGS = -O2 
-#CFLAGS = -O2 -arch x86_64
+CFLAGS = -O2 -arch x86_64
 #LIBS = -lm -framework veclib
 LIBS = -framework Accelerate
 

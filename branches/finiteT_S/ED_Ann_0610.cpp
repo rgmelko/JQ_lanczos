@@ -32,17 +32,19 @@ int main(){
 //  cout<<sizeof(float)<<endl;
 
   PARAMS prm;
+  double Delta;
   double J;
   double J2;
   double Q;
   int Sz;
   
+  Delta=prm.Delta_;
   J=prm.JJ_;
   J2=prm.J2_;
   Q=-prm.QQ_;// SIGN HAS TO BE FLIPPED: NOW SIGN AT INPUT IS SAME AS PAPER 
   Sz=prm.Sz_;
 
-  GENHAM HV(16,J,J2,Q,Sz); 
+  GENHAM HV(16,Delta,J,J2,Q,Sz); 
   HV.Bonds_16B(); 
 
 #ifdef DO_LANCZOS    
