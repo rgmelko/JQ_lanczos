@@ -1,0 +1,8 @@
+A decade-old code for simulating the JQ model with J1, J2 and Q.
+
+Note: uses Blitz++
+https://sourceforge.net/projects/blitz/
+
+See http://physik.uni-graz.at/~crg/Programmierkurs1112/pdfs/blitz.pdf
+
+Add -I /pathto/Blitz++ as a complier flag
